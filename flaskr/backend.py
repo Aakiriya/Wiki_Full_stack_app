@@ -18,10 +18,10 @@ class Backend:
         for blob in blobs:
             print(blob.name)
 
-    def upload(self, page_name, page):
-        blob = self.bucket.blob(page_name)
-        with blob.open("w") as f:
-            f.write(page)
+    def upload(self, page):
+        blob = self.bucket.blob(page)
+        with blob.open("w") as f, open(page) as p:
+            f.write(p.read())
 
     #@app.route('/sign_up', methods=['POST','GET'])    
     def sign_up(self, user_name, pwd):
@@ -52,9 +52,7 @@ class Backend:
     def get_image(self):
         pass
 
-
-
 b = Backend("contentwiki")
-b.upload("warzone", "page")
-b.get_all_page_names()
-b.sign_up("John","John1234")
+# b.upload("testpage.txt")
+# b.get_all_page_names()
+# b.sign_up("John","John1234")
