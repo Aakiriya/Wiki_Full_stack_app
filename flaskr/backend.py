@@ -1,6 +1,9 @@
 # TODO(Project 1): Implement Backend according to the requirements.
 from google.cloud import storage
 import hashlib
+from io import BytesIO
+import urllib, base64
+
 client = storage.Client()
 
 class Backend:
@@ -18,10 +21,10 @@ class Backend:
         for blob in blobs:
             print(blob.name)
 
-    def upload(self, page):
-        blob = self.bucket.blob(page)
-        with blob.open("w") as f, open(page) as p:
-            f.write(p.read())
+    def upload(self, page_name, page):
+        blob = self.bucket.blob(page_name)
+        with blob.open("w") as f:
+            f.write(page.read().decode())
 
     #@app.route('/sign_up', methods=['POST','GET'])    
     def sign_up(self, user_name, pwd):
@@ -49,8 +52,14 @@ class Backend:
     def sign_in(self):
         pass
 
-    def get_image(self):
-        pass
+    def get_image(self, image_name):
+        blobs = self.storage_client.list_blobs(self.bucket_name)
+        for blob in blobs:
+            if blob.name[:-4] == image_name:
+                with blob.open("rb") as b:
+                    img_string = base64.b64encode(b.read())
+                    img = 'data:image/png;base64,' + urllib.parse.quote(img_string)
+                    return img
 
 b = Backend("contentwiki")
 # b.upload("testpage.txt")

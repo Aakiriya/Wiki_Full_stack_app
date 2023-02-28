@@ -1,5 +1,5 @@
-from flask import render_template
-
+from flask import Flask, request, render_template
+from .backend import Backend
 
 def make_endpoints(app):
 
@@ -12,3 +12,36 @@ def make_endpoints(app):
         return render_template("main.html")
 
     # TODO(Project 1): Implement additional routes according to the project requirements.
+    
+    @app.route("/about")    
+    def about():
+        b = Backend("contentwiki")
+        b_pic = b.get_image('b_pic')
+        return render_template("about.html", b_pic=b_pic)
+        # g_pic = b.get_image("g_pic")
+        # r_pic = b.get_image("r_pic")
+        # return render_template("about.html", b_pic = b_pic, g_pic = g_pic, r_pic = r_pic)
+    
+    @app.route("/upload", methods=['GET', 'POST'])
+    def upload_file():
+        allowed_ext = {'txt', 'pdf', 'png', 'jpg', 'jpeg'}
+        if request.method == 'POST':
+            if 'file' not in request.files:
+                return "File was not uploaded correctly. Please try again."
+            file = request.files['file']
+            if file.filename == "":
+                return "Please upload a file"
+            elif file and file.filename.split('.')[1] in allowed_ext:
+                b = Backend("contentwiki")
+                f = b.upload(request.form.get("filename"), file)
+                # return redirect(url_for('download_file', name=filename))
+        return '''
+        <!doctype html>
+        <title>Upload</title>
+        <h3> Upload a doc to the wiki! </h3>
+        <form method=post enctype=multipart/form-data>
+            <input type='text' name='filename' placeholder="wikiname">
+            <input type='file' name='file'> 
+            <input type='submit' value='Upload'>
+        </form>
+        '''
