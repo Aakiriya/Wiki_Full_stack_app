@@ -16,11 +16,10 @@ def make_endpoints(app):
     @app.route("/about")    
     def about():
         b = Backend("contentwiki")
-        b_pic = b.get_image('b_pic')
-        return render_template("about.html", b_pic=b_pic)
-        # g_pic = b.get_image("g_pic")
-        # r_pic = b.get_image("r_pic")
-        # return render_template("about.html", b_pic = b_pic, g_pic = g_pic, r_pic = r_pic)
+        b_pic = b.get_image('bethany')
+        g_pic = b.get_image("gabriel")
+        # r_pic = b.get_image("")
+        return render_template("about.html", b_pic = b_pic, g_pic = g_pic)
     
     @app.route("/upload", methods=['GET', 'POST'])
     def upload_file():

@@ -23,9 +23,9 @@ class Backend:
 
     def upload(self, page_name, page):
         blob = self.bucket.blob(page_name)
-        with blob.open("w") as f:
-            f.write(page.read().decode())
-
+        with blob.open("wb") as f:
+            f.write(page.read())
+ 
     #@app.route('/sign_up', methods=['POST','GET'])    
     def sign_up(self, user_name, pwd):
         #if request.method == "POST":
@@ -55,7 +55,7 @@ class Backend:
     def get_image(self, image_name):
         blobs = self.storage_client.list_blobs(self.bucket_name)
         for blob in blobs:
-            if blob.name[:-4] == image_name:
+            if blob.name == image_name:
                 with blob.open("rb") as b:
                     img_string = base64.b64encode(b.read())
                     img = 'data:image/png;base64,' + urllib.parse.quote(img_string)
