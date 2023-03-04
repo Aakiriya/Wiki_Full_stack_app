@@ -32,7 +32,7 @@ def make_endpoints(app):
                 return "Please upload a file"
             elif file and file.filename.split('.')[1] in allowed_ext:
                 b = Backend("contentwiki")
-                f = b.upload(request.form.get("filename"), file)
+                b.upload(request.form.get("filename"), file)
                 # return redirect(url_for('download_file', name=filename))
         return render_template("upload.html")
         
@@ -60,3 +60,18 @@ def make_endpoints(app):
             b.sign_up(username, password)
         return render_template('signup.html')        
         
+    @app.route('/pages')
+    def pages():
+        backend = Backend("contentwiki")
+        pages = backend.get_all_page_names()
+        return render_template("pages.html", pages = pages)
+    
+    @app.route('/pages/<name>')
+    def show_page(name):
+        backend = Backend("contentwiki")
+        content = backend.get_wiki_page(name)
+        #page_img = backend.get_image(name)
+        if content is not None:
+            return content
+        else:
+            return f'Page {name} not found'

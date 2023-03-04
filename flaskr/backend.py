@@ -17,12 +17,19 @@ class Backend:
         self.bucket = self.storage_client.bucket(bucket_name)
 
     def get_wiki_page(self, name):
-        pass
+        blob = self.bucket.blob(name)
+        if blob.exists():
+            return blob.download_as_string()
+        else:
+            return None
 
     def get_all_page_names(self):
         blobs = self.storage_client.list_blobs(self.bucket_name)
+        pages = {}
         for blob in blobs:
-            print(blob.name)
+            if blob.content_type != 'image':
+                pages[blob.name] = blob
+        return pages
 
     def upload(self, page_name, page):
         blob = self.bucket.blob(page_name)
@@ -95,5 +102,3 @@ class Backend:
                     img_string = base64.b64encode(b.read())
                     img = 'data:image/png;base64,' + urllib.parse.quote(img_string)
                     return img
-
-b = Backend("contentwiki")
