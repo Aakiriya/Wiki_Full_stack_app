@@ -44,3 +44,26 @@ def make_endpoints(app):
             <input type='submit' value='Upload'>
         </form>
         '''
+    @app.route('/login', methods=['POST','GET'])
+    def sign_in():
+        if request.method == "POST":
+            username = request.form['name']
+            password = request.form['psw']
+            b = Backend('userspasswords')
+            info = b.sign_in(username, password)
+
+            if info == 'Invalid User' or info == 'Invalid Password':
+                return render_template('login.html', info=info)
+
+            else:
+                return render_template('main.html', info=info)
+        return render_template('login.html')
+
+    @app.route('/signup', methods=['POST','GET'])
+    def sign_up():
+        if request.method == "POST":
+            username = request.form['name']
+            password = request.form['psw']
+            b = Backend('userspasswords')
+            b.sign_up(username, password)
+        return render_template('signup.html')        
