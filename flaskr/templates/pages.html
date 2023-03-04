@@ -1,0 +1,14 @@
+<html>
+    <head>
+        <title>Pages Contained in this Wiki</title>
+       <!-- <link rel="stylesheet" href="../static/css/style.css"> -->
+        <h3>Pages Contained in this Wiki</h3>
+    </head>
+    <body>
+        <ul>
+            {% for page in pages %}
+                <li><a href="/pages/{{ page }}">{{ page }}</a></li>
+            {% endfor %}
+        </ul>
+    </body>
+</html>
