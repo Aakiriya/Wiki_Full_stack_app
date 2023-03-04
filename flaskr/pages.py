@@ -34,16 +34,8 @@ def make_endpoints(app):
                 b = Backend("contentwiki")
                 f = b.upload(request.form.get("filename"), file)
                 # return redirect(url_for('download_file', name=filename))
-        return '''
-        <!doctype html>
-        <title>Upload</title>
-        <h3> Upload a doc to the wiki! </h3>
-        <form method=post enctype=multipart/form-data>
-            <input type='text' name='filename' placeholder="wikiname">
-            <input type='file' name='file'> 
-            <input type='submit' value='Upload'>
-        </form>
-        '''
+        return render_template("upload.html")
+        
     @app.route('/login', methods=['POST','GET'])
     def sign_in():
         if request.method == "POST":
@@ -67,3 +59,4 @@ def make_endpoints(app):
             b = Backend('userspasswords')
             b.sign_up(username, password)
         return render_template('signup.html')        
+        
