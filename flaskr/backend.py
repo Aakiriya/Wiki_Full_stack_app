@@ -23,6 +23,9 @@ class Backend:
 
     def upload(self, page_name, page):
         blob = self.bucket.blob(page_name)
+        img = ["image/jpeg", "image/jpg", "image/png"]
+        if page.content_type in img:
+            blob.content_type = "image"
         with blob.open("wb") as f:
             f.write(page.read())
  
@@ -60,8 +63,3 @@ class Backend:
                     img_string = base64.b64encode(b.read())
                     img = 'data:image/png;base64,' + urllib.parse.quote(img_string)
                     return img
-
-b = Backend("contentwiki")
-# b.upload("testpage.txt")
-# b.get_all_page_names()
-# b.sign_up("John","John1234")
