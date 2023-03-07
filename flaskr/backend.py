@@ -9,7 +9,7 @@ import urllib, base64
 client = storage.Client()
 
 class Backend:
-
+    # class Backend holds the method to interact with the GSC, thus we initialize the bucket & storage client needed to access the correct blobs
     def __init__(self, bucket_name):
         self.bucket_name = bucket_name
         self.storage_client = storage.Client()
@@ -31,15 +31,16 @@ class Backend:
         return pages #return all the pages
 
     def upload(self, page_name, page):
-        blob = self.bucket.blob(page_name)
-        img = ["image/jpeg", "image/jpg", "image/png"]
-        if page.content_type in img:
+        blob = self.bucket.blob(page_name) # get blob based on page_name
+        img = ["image/jpeg", "image/jpg", "image/png"] # valid image types
+        if page.content_type in img: # set content type to image if the page is an image
             blob.content_type = "image"
-        with blob.open("wb") as f:
+        with blob.open("wb") as f: # write page contents to blob in cloud
             f.write(page.read())
  
-    def sign_up(self,user_name, pwd):        
-        name = user_name
+    def sign_up(self,user_name, pwd):     
+        # get username, password from user, salt for hashing   
+        name = user_name 
         password = pwd
         salt = "5gz"
 
@@ -56,7 +57,8 @@ class Backend:
             f.write(f"{hashed_password.hexdigest()}")
 
 
-    def sign_in(self,user_name, pwd):        
+    def sign_in(self,user_name, pwd):       
+        # get username, password from user, salt for hashing   
         username = user_name
         password = pwd
         salt = "5gz"
@@ -82,13 +84,20 @@ class Backend:
                         
 
     def get_image(self, image_name, blob_param=None):
+        # get blob based on image name
         blobs = self.storage_client.list_blobs(self.bucket_name)
+
+        # function decodes image to readable version to display on html page
         def decode_img(image):
             img_string = base64.b64encode(image.read())
             img = 'data:image/png;base64,' + urllib.parse.quote(img_string)
             return img
+
+        # if (optional) blob supplied, decode image directly
         if blob_param:
             return decode_img(blob_param)
+        
+        # if not, find blob that matches image name and return decoded image
         for blob in blobs:
             if blob.name == image_name:
                 with blob.open("rb") as b:

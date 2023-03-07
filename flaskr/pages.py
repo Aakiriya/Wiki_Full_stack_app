@@ -7,13 +7,14 @@ def make_endpoints(app):
     # go to a specific route on the project's website.
     @app.route("/")
     def home():
-        games = Backend("contentwiki").get_image("games")
-        return render_template("main.html", games=games)
+        games = Backend("contentwiki").get_image("games") # get background image
+        return render_template("main.html", games=games) # render main page with background image
 
     # TODO(Project 1): Implement additional routes according to the project requirements.
     
     @app.route("/about")    
     def about():
+        # gets background image along with about images for the three authors, then returns it to about page on render
         games = Backend("contentwiki").get_image("games")
         b = Backend("contentwiki")
         b_pic = b.get_image('bethany')
@@ -23,21 +24,29 @@ def make_endpoints(app):
     
     @app.route("/upload", methods=['GET', 'POST'])
     def upload_file():
+        # gets background image
         games = Backend("contentwiki").get_image("games")
-        allowed_ext = {'txt', 'pdf', 'png', 'jpg', 'jpeg'}
+        # sets allowed file types, messages to return based on situation
+        allowed_ext = {'txt', 'png', 'jpg', 'jpeg'}
         message = ["File was not uploaded correctly. Please try again.", "Please upload a file.", "File type not supported.", "Uploaded successfully."]
+        
         if request.method == 'POST':
+            # if no file is found in request/request made incorrectly, return first error message
             if 'file' not in request.files:
                 return render_template("upload.html", message=message[0], games = games)
             file = request.files['file']
+
+            # if no file found in request + wiki page name was supplied, return second error message
             if file.filename == "":
                 return render_template("upload.html", message=message[1], games = games)
             elif file.filename.split('.')[1] not in allowed_ext:
                 return render_template("upload.html", message=message[2], games = games)
+
+            # if file is correct, pass file and filename to upload() function and return success message
             elif file:
                 b = Backend("contentwiki")
                 b.upload(request.form.get("filename"), file)
-                return render_template("upload.html", message=message[3])
+                return render_template("upload.html", message=message[3], games = games)
         return render_template("upload.html", games = games)
         
     @app.route('/login', methods=['POST','GET'])
@@ -89,5 +98,6 @@ def make_endpoints(app):
 
     @app.route("/logout")    
     def logout():
+        # when user logs out, set session username to None, then redirect to home page
         session['username'] = None
         return redirect('/')

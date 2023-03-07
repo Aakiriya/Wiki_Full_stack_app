@@ -31,9 +31,12 @@ class TestBackend(unittest.TestCase):
         self.mock_blobs = [self.mock_blob1, self.mock_blob2, self.mock_blob3] #mock bucket with the pages
 
     def test_upload(self):
+        # set up mock to exist and return 'test title' when blob is attempted to be downloaded
         self.mock_blob.exists.return_value = True
         self.mock_blob.download_as_string.return_value = b'test title'
         self.backend.bucket.blob = MagicMock(return_value=self.mock_blob)
+
+        # mock the open file to pass a fake file in with content_type 'txt', then assert it returns the correct information
         with patch("builtins.open", mock_open(read_data=b'test title')) as mock_file:
             fake_file = open("fakefile")
             fake_file.content_type = '.txt'
@@ -42,6 +45,7 @@ class TestBackend(unittest.TestCase):
         mock_file.assert_called_with("fakefile")
     
     def test_get_image(self):
+        # set up mock blobs to parse through on iteration
         name = 'test-image'
         mock_blob1 = MagicMock()
         mock_blob1.name = "test1"
@@ -52,6 +56,8 @@ class TestBackend(unittest.TestCase):
         mock_blobs = MagicMock()
         mock_blobs.return_value = iter({mock_blob1,mock_blob2,mock_blob3})
         self.backend.storage_client.list_blobs = mock_blobs
+
+        # mock open, pass in blob list along with the image name, and assert an image is returned
         with patch("builtins.open", mock_open(read_data=b'img data')):
             result = self.backend.get_image(name, open(mock_blob2))
             assert 'data:image' in result
