@@ -68,3 +68,9 @@ def test_logout(client):
     assert "redirect" in resp.data.decode('utf-8')
     with client.session_transaction() as sess:
         assert sess['username'] is None
+
+def test_pages_page(client): #Test if the pages html actually displays the actual pages
+    resp = client.get("/pages")
+    assert resp.status_code == 200
+    assert b"<h3>Pages Contained in this Wiki</h3>" in resp.data
+    assert b"<a href=\"/pages/" in resp.data

@@ -1,17 +1,28 @@
-{% extends "main.html" %}
+{% extends 'main.html' %}
+<style>
+    body{
+
+        background-image: url("{{games}}");
+        background-size: cover;
+    }
+</style>
+
 {% block content %}
-<html>
-    <head>
-        <title>Pages</title>
-       <!-- <link rel="stylesheet" href="../static/css/style.css"> -->
-        <h3>Pages contained in this Wiki</h3>
-    </head>
-    <body>
-        <ul>
-            {% for page in pages %}
-                <li><a href="/pages/{{ page }}">{{ page }}</a></li>
-            {% endfor %}
-        </ul>
-    </body>
-</html>
+    <div>
+        {% if pages %}
+        <h3>Pages Contained in this Wiki</h3>
+        {% endif %}
+        <h4>{{ page_title }}</h4>
+    </div>
+    <hr>
+   <div>
+    <p>{{ page_content }}</p>
+        {% if pages %}
+            <ul>
+                {% for page in pages %}
+                    <a href="/pages/{{ page }}">{{ page }}</a><br>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
 {% endblock %}

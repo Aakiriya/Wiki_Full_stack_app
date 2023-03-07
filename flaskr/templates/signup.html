@@ -1,8 +1,19 @@
 {% extends "main.html" %}
+<style>
+    body{
+
+        background-image: url("{{games}}");
+        background-size: cover;
+    }
+</style>
+
 {% block content %}
-<!DOCTYPE html>
-<html>
+    <div>
     <h1>Sign Up</h1>
+    </div>
+    <hr>
+
+    <div>
     <p>Please fill in this form to create an account.</p>
 
     <form action='/signup' method='POST'>
@@ -15,7 +26,6 @@
 
         <button type="submit" class="signupbtn">Sign Up</button>
     </form>
-
     {{info}}
-</html>
+    </div>
 {% endblock %}

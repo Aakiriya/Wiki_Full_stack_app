@@ -16,19 +16,19 @@ class Backend:
         self.bucket = self.storage_client.bucket(bucket_name)
 
     def get_wiki_page(self, name):
-        blob = self.bucket.blob(name)
-        if blob.exists():
-            return blob.download_as_string()
+        blob = self.bucket.blob(name) #search for th page with the given name
+        if blob.exists(): 
+            return blob.download_as_string() #if the page exists return the string
         else:
-            return None
+            return None #else return None
 
     def get_all_page_names(self):
-        blobs = self.storage_client.list_blobs(self.bucket_name)
-        pages = {}
-        for blob in blobs:
-            if blob.content_type != 'image':
-                pages[blob.name] = blob
-        return pages
+        blobs = self.storage_client.list_blobs(self.bucket_name) #list all pages
+        pages = {} #empty dict
+        for blob in blobs: #read each blob
+            if blob.content_type != 'image': #if is not an image
+                pages[blob.name] = blob #save it in a dictionary
+        return pages #return all the pages
 
     def upload(self, page_name, page):
         blob = self.bucket.blob(page_name)

@@ -14,32 +14,35 @@ def make_endpoints(app):
     
     @app.route("/about")    
     def about():
+        games = Backend("contentwiki").get_image("games")
         b = Backend("contentwiki")
         b_pic = b.get_image('bethany')
         g_pic = b.get_image("gabriel")
         r_pic = b.get_image('rakshith')
-        return render_template("about.html", b_pic = b_pic, g_pic = g_pic, r_pic = r_pic)
+        return render_template("about.html", b_pic = b_pic, g_pic = g_pic, r_pic = r_pic, games = games)
     
     @app.route("/upload", methods=['GET', 'POST'])
     def upload_file():
+        games = Backend("contentwiki").get_image("games")
         allowed_ext = {'txt', 'pdf', 'png', 'jpg', 'jpeg'}
         message = ["File was not uploaded correctly. Please try again.", "Please upload a file.", "File type not supported.", "Uploaded successfully."]
         if request.method == 'POST':
             if 'file' not in request.files:
-                return render_template("upload.html", message=message[0])
+                return render_template("upload.html", message=message[0], games = games)
             file = request.files['file']
             if file.filename == "":
-                return render_template("upload.html", message=message[1])
+                return render_template("upload.html", message=message[1], games = games)
             elif file.filename.split('.')[1] not in allowed_ext:
-                return render_template("upload.html", message=message[2])
+                return render_template("upload.html", message=message[2], games = games)
             elif file:
                 b = Backend("contentwiki")
                 b.upload(request.form.get("filename"), file)
                 return render_template("upload.html", message=message[3])
-        return render_template("upload.html")
+        return render_template("upload.html", games = games)
         
     @app.route('/login', methods=['POST','GET'])
     def sign_in():
+        games = Backend("contentwiki").get_image("games")
         if request.method == "POST":
             username = request.form['name']
             password = request.form['psw']
@@ -47,15 +50,16 @@ def make_endpoints(app):
             info = b.sign_in(username, password)
 
             if info == 'Invalid User' or info == 'Invalid Password':
-                return render_template('login.html', info=info)
+                return render_template('login.html', info=info, games = games)
 
             else:
                 session['username'] = username
                 return redirect('/')
-        return render_template('login.html')
+        return render_template('login.html', games = games)
 
     @app.route('/signup', methods=['POST','GET'])
     def sign_up():
+        games = Backend("contentwiki").get_image("games")        
         if request.method == "POST":
             username = request.form['name']
             password = request.form['psw']
@@ -63,21 +67,23 @@ def make_endpoints(app):
             b.sign_up(username, password)
             session['username'] = username
             return redirect('/')
-        return render_template('signup.html')        
+        return render_template('signup.html', games = games)        
         
     @app.route('/pages')
     def pages():
-        backend = Backend("contentwiki")
-        pages = backend.get_all_page_names()
-        return render_template("pages.html", pages = pages)
+        backend = Backend("contentwiki") #Call the backend with the buckets name
+        pages = backend.get_all_page_names() #call the get allpages and save the dictionary in pages
+        games = Backend("contentwiki").get_image("games") #background
+        return render_template('pages.html', pages = pages, games = games) #render the pages reading the dictionary
     
     @app.route('/pages/<name>')
     def show_page(name):
-        backend = Backend("contentwiki")
-        content = backend.get_wiki_page(name)
-        #page_img = backend.get_image(name)
+        backend = Backend("contentwiki") #Call the backend with the buckets name
+        content = backend.get_wiki_page(name) #send the name of tha page we want ot show
+        games = Backend("contentwiki").get_image("games") #background
         if content is not None:
-            return render_template("page.html", content=content.decode('utf-8'))
+            decoded_content  = content.decode('utf-8') #decode the text from the page
+            return render_template('pages.html', page_title=name, page_content=decoded_content, games = games) #send the text for rendering
         else:
             return f'Page {name} not found'
 
