@@ -1,5 +1,5 @@
 # TODO(Project 1): Implement Backend according to the requirements.
-from flask import Blueprint,request, Flask, render_template
+from flask import Blueprint,request, Flask, render_template, session
 from google.cloud import storage
 import hashlib
 from io import BytesIO
@@ -8,7 +8,6 @@ import urllib, base64
 client = storage.Client()
 app = Flask(__name__)
 
-@app.route('/')
 class Backend:
 
     def __init__(self, bucket_name):
@@ -94,11 +93,18 @@ class Backend:
                 #print('name')
         
 
-    def get_image(self, image_name):
+    def get_image(self, image_name, blob_param=None):
         blobs = self.storage_client.list_blobs(self.bucket_name)
+        def decode_img(image):
+            img_string = base64.b64encode(image.read())
+            img = 'data:image/png;base64,' + urllib.parse.quote(img_string)
+            return img
+        if blob_param:
+            return decode_img(blob_param)
         for blob in blobs:
             if blob.name == image_name:
                 with blob.open("rb") as b:
-                    img_string = base64.b64encode(b.read())
-                    img = 'data:image/png;base64,' + urllib.parse.quote(img_string)
-                    return img
+                    return decode_img(b)             
+
+if __name__ == 'main':
+    unittest.main()

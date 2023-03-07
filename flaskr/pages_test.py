@@ -1,6 +1,10 @@
 from flaskr import create_app
-
+from flask import session
 import pytest
+from unittest import mock
+from unittest.mock import Mock, MagicMock, patch
+from .backend import Backend
+import io 
 
 # See https://flask.palletsprojects.com/en/2.2.x/testing/ 
 # for more info on testing
@@ -9,17 +13,58 @@ def app():
     app = create_app({
         'TESTING': True,
     })
+    
     return app
 
 @pytest.fixture
 def client(app):
     return app.test_client()
 
-# TODO(Checkpoint (groups of 4 only) Requirement 4): Change test to
-# match the changes made in the other Checkpoint Requirements.
-def test_home_page(client):
+def test_home(client):
+    with client.session_transaction() as session:
+        session['username'] = None
     resp = client.get("/")
     assert resp.status_code == 200
-    assert b"Hello, World!\n" in resp.data
+    response = resp.data.decode('utf-8')
+    login = '<a href="/login">Login</a>\n'
+    assert login in response
+    with client.session_transaction() as session:
+        session['username'] = 'me'
+    resp = client.get("/").data.decode('utf-8')
+    user =  '<a> | me |</a>'
+    logout = '<a href="/logout">Logout</a>'
+    assert user in resp 
+    assert logout in resp
 
-# TODO(Project 1): Write tests for other routes.
+def test_about(client):
+    resp = client.get("/about").data.decode('utf-8')
+    about = '<p> This wiki serves as a hub to all things video games! </p>'
+    assert about in resp
+
+def test_upload(client):
+    resp = client.post("/upload").data.decode('utf-8')
+    assert "File was not uploaded correctly." in resp
+
+    data = {
+        'file': (io.BytesIO(b"text data"), ''),
+        'filename': 'test'
+    }
+    resp = client.post("/upload", data=data,content_type='multipart/form-data')
+    assert "Please upload a file." in resp.data.decode('utf-8')
+
+    data['file'] = (io.BytesIO(b"text data"), 'test.idk')
+    resp = client.post("/upload", data=data,content_type='multipart/form-data')
+    assert "File type not supported." in resp.data.decode('utf-8')
+
+    data['file'] = (io.BytesIO(b"text data"), 'test.txt')
+    with mock.patch('flaskr.backend.storage.Client'):
+        resp = client.post("/upload", data=data,content_type='multipart/form-data')
+        assert "Uploaded successfully." in resp.data.decode('utf-8')
+
+def test_logout(client):
+    with client.session_transaction() as sess:
+        sess['username'] = "beth"
+    resp = client.get("/logout")
+    assert "redirect" in resp.data.decode('utf-8')
+    with client.session_transaction() as sess:
+        assert sess['username'] is None

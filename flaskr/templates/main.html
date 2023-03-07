@@ -2,25 +2,30 @@
 <html>
 <head>
     <head>
-        <!-- TODO(Checkpoint Requirement 3): Change the title and content of your wiki.-->
         <title>Cool Team</title>
-        <a href="/">Home</a>
-        <a href="/pages">Pages</a>
-        <a href="/about">About</a>
-        <a href="/upload">Upload</a>
-        <a href="/signin.html">Sign in</a>
-        <a href="/signup.html">Sign up</a>
-
-
+        {% if session.username %}
+            <a href="/">Home</a>
+            <a href="/pages">Pages</a>
+            <a href="/about">About</a>
+            <a> | {{session.username}} |</a>
+            <a href="/upload">Upload</a>
+            <a href="/logout">Logout</a>
+        {% else %}
+            <a href="/">Home</a>
+            <a href="/pages">Pages</a>
+            <a href="/about">About</a>
+            <a href="/login">Login</a>
+            <a href="/signup">Signup</a>
+        {% endif %}
     </head>
 </head>
 {% block content %}
 <body>
-    <!-- TODO(Project 1): Implement routes. -->
     <div>       
-        <!-- TODO(Checkpoint Requirement 3): Change the title and content of your wiki.-->
-        We are the cool team! Welcome to our video game wiki!
+        <br>
+        Welcome to our video game wiki!
     </div>
+    <img src={{games}} width="800" height="600">
 </body>
 {% endblock %}
 
