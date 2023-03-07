@@ -46,14 +46,14 @@ def make_endpoints(app):
         if request.method == "POST":
             username = request.form['name']
             password = request.form['psw']
-            b = Backend('userspasswords')
+            b = Backend('userspasswords')#passes the unsername and password entered to the login function in Backend class
             info = b.sign_in(username, password)
 
-            if info == 'Invalid User' or info == 'Invalid Password':
+            if info == 'Invalid User' or info == 'Invalid Password':#if the passward or username is invalid it renders back to the login page and displays the error message
                 return render_template('login.html', info=info, games = games)
 
             else:
-                session['username'] = username
+                session['username'] = username #adds the username to the session
                 return redirect('/')
         return render_template('login.html', games = games)
 
@@ -64,8 +64,8 @@ def make_endpoints(app):
             username = request.form['name']
             password = request.form['psw']
             b = Backend('userspasswords')
-            b.sign_up(username, password)
-            session['username'] = username
+            b.sign_up(username, password) #passes the unsername and password entered to the signup function in Backend class
+            session['username'] = username #adds the username to the session
             return redirect('/')
         return render_template('signup.html', games = games)        
         

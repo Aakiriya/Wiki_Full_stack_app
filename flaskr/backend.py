@@ -1,12 +1,12 @@
 # TODO(Project 1): Implement Backend according to the requirements.
 from flask import Blueprint,request, Flask, render_template, session
+from flask import request, Flask
 from google.cloud import storage
 import hashlib
 from io import BytesIO
 import urllib, base64
 
 client = storage.Client()
-app = Flask(__name__)
 
 class Backend:
 
@@ -50,7 +50,8 @@ class Backend:
     
         bucket = client.bucket('userspasswords')
         blob = bucket.blob(name)
-            
+
+        #Adds the encoded passsword to the created user blob
         with blob.open("w") as f:
             f.write(f"{hashed_password.hexdigest()}")
 
@@ -64,34 +65,21 @@ class Backend:
         dataBase_password = password+salt
         # Encoding the password
         hashed_password = hashlib.md5(dataBase_password.encode())
-
-        storage_client = storage.Client()
-
+        
         bucket = client.bucket('userspasswords')
-        blobs = storage_client.list_blobs('userspasswords')
-            
-        users = set()
-        for blob in blobs:
-            users.add(blob.name)
-        print(users)
-
-        #with bucket.open("r") as f:
-        if username not in users:
-            return 'Invalid User'            
-            #print("Invalid User")
-        else:
-            blob = bucket.blob(username)
+        blob = bucket.blob(username)            
+        
+        #checks if the entered username exsists in the bucket
+        if not blob.exists():
+            return 'Invalid User'           
+        else:            
             with blob.open("r") as f:
-                psw = f.read()
-                
-            if hashed_password.hexdigest() != psw:
-                return 'Invalid Password'
-                    #print(psw, hashed_password.hexdigest())
-                    #print('Invalid Password')
+                psw = f.read()  # reads the stored password from the blob              
+            if hashed_password.hexdigest() != psw:                
+                return 'Invalid Password'                     
             else:
                 return username
-                #print('name')
-        
+                        
 
     def get_image(self, image_name, blob_param=None):
         blobs = self.storage_client.list_blobs(self.bucket_name)
@@ -105,6 +93,3 @@ class Backend:
             if blob.name == image_name:
                 with blob.open("rb") as b:
                     return decode_img(b)             
-
-if __name__ == 'main':
-    unittest.main()

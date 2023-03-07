@@ -74,3 +74,11 @@ def test_pages_page(client): #Test if the pages html actually displays the actua
     assert resp.status_code == 200
     assert b"<h3>Pages Contained in this Wiki</h3>" in resp.data
     assert b"<a href=\"/pages/" in resp.data
+
+def test_signup_route(client): #Tests if the signup page is routing properly and it displays the intended message 
+    resp = client.get("/signup").data.decode('utf-8')
+    assert '<p>Please fill in this form to create an account.</p>' in resp
+
+def test_signin_route(client): #Tests if the signup page is routing properly and it displays the intended message 
+    resp = client.get("/login").data.decode('utf-8')
+    assert '<p>Please fill in this form to sign in to your account.</p>' in resp
