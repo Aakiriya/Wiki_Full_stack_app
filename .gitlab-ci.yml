@@ -1,4 +1,5 @@
 image: python:3
+
 lint:
  stage: test
  script:
@@ -6,6 +7,7 @@ lint:
   - yapf --style google --recursive --diff .
  only:
   - pushes
+
 unittest:
  stage: test
  needs:
