@@ -22,7 +22,7 @@ class Backend:
             return blob.download_as_string(
             )  #if the page exists return the string
         else:
-            return None  #else return None
+            return None  #else, return None
 
     def get_all_page_names(self):
         blobs = self.storage_client.list_blobs(
