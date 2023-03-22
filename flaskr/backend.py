@@ -65,7 +65,7 @@ class Backend:
 
         # Adding salt at the last of the password
         dataBase_password = password+salt
-        # Encoding the password
+        # encoding the password
         hashed_password = hashlib.md5(dataBase_password.encode())
         
         bucket = client.bucket('userspasswords')
