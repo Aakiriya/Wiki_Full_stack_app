@@ -11,7 +11,7 @@ class TestBackend(unittest.TestCase):
 
     def setUp(self):
         self.bucket_name = 'test-bucket'  #mock bucket
-        self.backend = Backend(self.bucket_name)  #inject the mock bucket
+        self.backend = Backend(self.bucket_name)  # inject the mock bucket
         self.mock_blob = MagicMock()  #create mock blob
         #mockblob characteristics for the tests
         self.mock_blob.return_value = self.mock_blob
