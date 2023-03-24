@@ -113,7 +113,7 @@ class TestBackend(unittest.TestCase):
     def test_signin_success(self):
         mock_blob = Mock()
         mock_blob.exists.return_value = False
-        backend = Mock(return_value = mock_blob)
+        backend = Mock(return_value=mock_blob)
         with mock.patch('flaskr.backend.storage'):
             backend.sign_up('testuser', 'testpassword')
 
@@ -130,13 +130,13 @@ class TestBackend(unittest.TestCase):
             mock_client.return_value.bucket.return_value = mock_bucket
             result = backend.sign_in('testuser', 'testpassword')
 
-        self.assertIsNotNone(result) # 'testuser'
+        self.assertIsNotNone(result)  # 'testuser'
 
     def test_signin_failure(self):
         # create a mock bucket blob for a non-existent user
         mock_blob = Mock()
         mock_blob.exists.return_value = False
-        self.backend = Mock(return_value = mock_blob)
+        self.backend = Mock(return_value=mock_blob)
         # replace the real bucket blob with the mock
         self.backend.storage_client.bucket = Mock(return_value=Mock(blob=Mock(
             return_value=mock_blob)))
@@ -144,20 +144,20 @@ class TestBackend(unittest.TestCase):
         # simulate a failed sign in with an invalid user
         with mock.patch('flaskr.backend.storage'):
             result = self.backend.sign_in('nonexistentuser', 'password')
-            self.assertIsNotNone(result) # 'Invalid User'
+            self.assertIsNotNone(result)  # 'Invalid User'
 
             # simulate a failed sign in with an invalid password
             mock_blob.exists.return_value = True
             mock_blob.open.return_value.read.return_value = 'invalidhash'
             result = self.backend.sign_in('testuser', 'invalidpassword')
-            self.assertIsNotNone(result) # 'Invalid Password'
+            self.assertIsNotNone(result)  # 'Invalid Password'
 
     def test_sign_up_success(self):
         user_name = 'testuser'
         password = 'testpassword'
         mock_blob = Mock()
         mock_blob.exists.return_value = False
-        self.backend = Mock(return_value = mock_blob)
+        self.backend = Mock(return_value=mock_blob)
         self.backend.storage_client.bucket = Mock(return_value=Mock(blob=Mock(
             return_value=mock_blob)))
         with mock.patch('flaskr.backend.storage'):
@@ -168,7 +168,7 @@ class TestBackend(unittest.TestCase):
             bucket = self.backend.storage_client.bucket('userspasswords')
             blob = bucket.blob(user_name)
             blob_contents = blob.download_as_bytes().decode('utf-8')
-            self.assertIsNotNone(blob_contents) # expected_password
+            self.assertIsNotNone(blob_contents)  # expected_password
 
 
 if __name__ == '__main__':
