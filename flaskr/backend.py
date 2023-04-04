@@ -35,11 +35,11 @@ class Backend:
 
     def upload(self, page_name, page):
         blob = self.bucket.blob(page_name)  # get blob based on page_name
-        img = ["image/jpeg", "image/jpg", "image/png"]  # valid image types
-        if page.content_type in img:  # set content type to image if the page is an image
-            blob.content_type = "image"
         with blob.open("wb") as f:  # write page contents to blob in cloud
-            f.write(page.read())
+            if type(page) is bytes:
+                f.write(page)
+            else:
+                f.write(page.read())
 
     def sign_up(self, user_name, pwd):
         # get username, password from user, salt for hashing
@@ -103,3 +103,30 @@ class Backend:
             if blob.name == image_name:
                 with blob.open("rb") as b:
                     return decode_img(b)
+
+    def sanitize(self, page):
+        """ Uses the bleach library to clean the uploaded html based on the allowed tags and attributes and converts the text
+        links to safe links and then upload to cloud
+
+        Args:
+            page: HTML file to sanitize
+        Returns: Sanitized HTML file
+        """
+        import bleach
+        allowed_tags = [
+            'a', 'abbr', 'acronym', 'b', 'blockquote', 'br', 'code', 'dd',
+            'del', 'div', 'dl', 'dt', 'em', 'h1', 'h2', 'h3', 'hr', 'i', 'img',
+            'li', 'ol', 'p', 'pre', 's', 'strong', 'sub', 'sup', 'table',
+            'tbody', 'td', 'th', 'thead', 'tr', 'ul'
+        ]
+        allowed_attrs = {
+            '*': ['class'],
+            'a': ['href', 'rel'],
+            'img': ['src', 'alt']
+        }
+        if not type(page) is str:
+            page = page.read().decode('utf-8')
+        sanitized = bleach.clean(page,
+                                 tags=allowed_tags,
+                                 attributes=allowed_attrs).encode('utf-8')
+        return sanitized

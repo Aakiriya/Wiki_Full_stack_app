@@ -34,7 +34,7 @@ def make_endpoints(app):
         # gets background image
         games = Backend("contentwiki").get_image("games")
         # sets allowed file types, messages to return based on situation
-        allowed_ext = {'txt', 'png', 'jpg', 'jpeg'}
+        allowed_ext = {'html', 'txt', 'png', 'jpg', 'jpeg'}
         message = [
             "File was not uploaded correctly. Please try again.",
             "Please upload a file.", "File type not supported.",
@@ -62,7 +62,10 @@ def make_endpoints(app):
             # if file is correct, pass file and filename to upload() function and return success message
             elif file:
                 b = Backend("contentwiki")
-                b.upload(request.form.get("filename"), file)
+                page_name = request.form.get("filename")
+                if file.filename.split('.')[1] == "html":
+                    file = b.sanitize(file)
+                b.upload(page_name, file)
                 return render_template("upload.html",
                                        message=message[3],
                                        games=games)

@@ -16,7 +16,7 @@
     </div>
     <hr>
    <div>
-    <p>{{ page_content }}</p>
+    <p>{{ page_content|safe }}</p>
         {% if pages %}
             <ul>
                 {% for page in pages %}
