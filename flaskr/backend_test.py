@@ -170,6 +170,32 @@ class TestBackend(unittest.TestCase):
             blob_contents = blob.download_as_bytes().decode('utf-8')
             self.assertIsNotNone(blob_contents)  # expected_password
 
+    def test_get_genre_success(self):
+        b = Backend('test-bucket')
+        test_title = "FIFA 23"
+        actual = ['Simulator', 'Sport']
+        assert b.get_genre(test_title) == actual
+
+    def test_get_genre_invalid_title(self):
+        b = Backend('test-bucket')
+        test_title = "not a title"
+        actual = "Title not found."
+        assert b.get_genre(test_title) == actual
+
+    def test_get_genre_no_genres(self):
+        b = Backend('test-bucket')
+        test_title = "Warzone"
+        actual = "Could not find genres for title."
+        assert b.get_genre(test_title) == actual
+
+    def test_upload_genre(self):
+        self.mock_blob.exists.return_value = True
+        self.mock_blob.download_as_string.return_value = b'test game'
+        self.backend.bucket.blob = MagicMock(return_value=self.mock_blob)
+
+        self.backend.upload_genre('test genre', 'test game')
+        assert self.backend.get_wiki_page('test genre') == b'test game'
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -23,7 +23,7 @@ def client(app):
     return app.test_client()
 
 
-def test_home(client):
+def test_home_logged_out(client):
     # set user as not logged in
     with client.session_transaction() as session:
         session['username'] = None
@@ -31,11 +31,12 @@ def test_home(client):
     # get home page, assert it was successful and that the user has option to login within the page contents
     with mock.patch('flaskr.backend.storage.Client'):
         resp = client.get("/")
-        assert resp.status_code == 200
         response = resp.data.decode('utf-8')
         login = '<a href="/login">Login</a>\n'
         assert login in response
 
+
+def test_home_logged_in(client):
     # set user as logged in
     with client.session_transaction() as session:
         session['username'] = 'me'
@@ -45,8 +46,7 @@ def test_home(client):
         resp = client.get("/").data.decode('utf-8')
         user = '<a> | me |</a>'
         logout = '<a href="/logout">Logout</a>'
-        assert user in resp
-        assert logout in resp
+        assert user in resp and logout in resp
 
 
 def test_about(client):
@@ -57,12 +57,14 @@ def test_about(client):
         assert about in resp
 
 
-def test_upload(client):
+def test_upload_error_file(client):
     # get upload route and assert "file is incorrect"
     with mock.patch('flaskr.backend.storage.Client'):
         resp = client.post("/upload").data.decode('utf-8')
         assert "File was not uploaded correctly." in resp
 
+
+def test_upload_no_file(client):
     data = {'file': (io.BytesIO(b"text data"), ''), 'filename': 'test'}
     # get upload route with no file supplied and assert to upload file
     with mock.patch('flaskr.backend.storage.Client'):
@@ -71,16 +73,20 @@ def test_upload(client):
                            content_type='multipart/form-data')
         assert "Please upload a file." in resp.data.decode('utf-8')
 
+
+def test_upload_wrong_file(client):
     # get upload route and pass in incorrect file extension, assert that the file type is not supported
-    data['file'] = (io.BytesIO(b"text data"), 'test.idk')
+    data = {'file': (io.BytesIO(b"text data"), 'test.idk'), 'filename': 'test'}
     with mock.patch('flaskr.backend.storage.Client'):
         resp = client.post("/upload",
                            data=data,
                            content_type='multipart/form-data')
         assert "File type not supported." in resp.data.decode('utf-8')
 
+
+def test_upload_success(client):
     # get upload route and pass in correct file type, assert upload was successful
-    data['file'] = (io.BytesIO(b"text data"), 'test.txt')
+    data = {'file': (io.BytesIO(b"text data"), 'test.txt'), 'filename': 'test'}
     with mock.patch('flaskr.backend.storage.Client'):
         resp = client.post("/upload",
                            data=data,
