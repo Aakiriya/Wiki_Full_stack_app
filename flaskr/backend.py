@@ -5,6 +5,7 @@ from google.cloud import storage
 import hashlib
 from io import BytesIO
 import urllib, base64
+import bleach
 
 client = storage.Client()
 
@@ -112,7 +113,6 @@ class Backend:
             page: HTML file to sanitize
         Returns: Sanitized HTML file
         """
-        import bleach
         allowed_tags = [
             'a', 'abbr', 'acronym', 'b', 'blockquote', 'br', 'code', 'dd',
             'del', 'div', 'dl', 'dt', 'em', 'h1', 'h2', 'h3', 'hr', 'i', 'img',
