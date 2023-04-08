@@ -128,5 +128,7 @@ class Backend:
             page = page.read().decode('utf-8')
         sanitized = bleach.clean(page,
                                  tags=allowed_tags,
-                                 attributes=allowed_attrs).encode('utf-8')
+                                 attributes=allowed_attrs)
+        if not type(sanitized) is bytes:
+            return sanitized.encode('utf-8')
         return sanitized

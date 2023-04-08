@@ -170,7 +170,8 @@ class TestBackend(unittest.TestCase):
             blob_contents = blob.download_as_bytes().decode('utf-8')
             self.assertIsNotNone(blob_contents)  # expected_password
 
-    def test_sanitize(self):
+    @patch('flaskr.backend.bleach.clean')
+    def test_sanitize(self, mock_bleach):
         """
         Assess if sanitized HTML matches the expected sanitized HTML
         """
@@ -178,8 +179,9 @@ class TestBackend(unittest.TestCase):
                 <h1> Page Title </h1>
                 <script> alert("Boom!")</script>
                 """
-        expected_html = b'&lt;script&gt; alert("Boom!")&lt;/script&gt;\n'
-        assert self.backend.sanitize(html).__contains__(expected_html)
+        mock_bleach.return_value = b'&lt;script&gt; alert("Boom!")&lt;/script&gt;\n'
+        assert self.backend.sanitize(
+            html) == b'&lt;script&gt; alert("Boom!")&lt;/script&gt;\n'
 
 
 if __name__ == '__main__':
