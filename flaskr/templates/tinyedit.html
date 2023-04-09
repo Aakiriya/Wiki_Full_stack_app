@@ -1,0 +1,24 @@
+{% extends "main.html" %}
+
+{% block content %}
+    <div>
+        <h1>Create your own Wiki!</h1>
+    </div>
+
+    <div>
+        <form action="" method="post">
+            <br>
+            <label for="title">Wiki name:</label>
+            <input type="text" id="title" name="title" placeholder="Enter Wiki name here">
+            <br>
+
+            <textarea name="textarea" id="default" cols="30" rows="10"></textarea>
+
+            <button type="button" id="download-button">Download Wiki to Save</button>
+            <button type="button" id="upload-button">Select Wiki to Edit</button>
+        </form>
+    </div>
+
+    <script src="{{ url_for('static', filename='tinymce/tinymce.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+{% endblock %}

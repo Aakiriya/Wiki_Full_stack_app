@@ -1,59 +1,39 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Cool Team</title>
-
-    {% if session.username %}
-        <a href="/">Home</a>
-        <a href="/pages">Pages</a>
-        <a href="/about">About</a>
-        <a> | {{session.username}} |</a>
-        <a href="/upload">Upload</a>
-        <a href="/logout">Logout</a>
-    {% else %}
-        <a href="/">Home</a>
-        <a href="/pages">Pages</a>
-        <a href="/about">About</a>
-        <a href="/login">Login</a>
-        <a href="/signup">Signup</a>
-    {% endif %}
-
-    <style>
-        body{
-
-            background-image: url("{{games}}")
-        }
-        div {
-            border: 1px solid black;
-            padding: 20px;
-            margin-top: 20px;
-            background-color: white;
-            box-shadow: 5px 5px 5px grey;
-            width: 80%;
-            margin-left: auto;
-            margin-right: auto;
-            text-align: center;
-            font-size: 20px;
-        }
-        a {
-            text-decoration: none;
-            color: black;
-            margin: 10px;
-            font-size: 18px;
-        }
-        a:hover {
-            color: blue;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
-{% block content %}
 <body>
-    <div>       
-        <br>
-        Welcome to our video game wiki!
-    </div>
+    {% if session.username %}
+        <nav>
+            <a href="/">Home</a>
+            <a href="/pages">Pages</a>
+            <a href="/about">About</a>
+            <a>| {{ session.username }} |</a>
+            <a href="/upload">Upload</a>
+            <a href="/logout">Logout</a>
+            <a href="/tinyedit">Editor</a>
+        </nav>
+    {% else %}
+        <nav>
+            <a href="/">Home</a>
+            <a href="/pages">Pages</a>
+            <a href="/about">About</a>
+            <a href="/login">Login</a>
+            <a href="/signup">Signup</a>
+        </nav>
+    {% endif %}
+
+    {% block content %}
+        <div>       
+            <br>
+            <h1>Welcome to our video game wiki!</h1>
+        </div>
+    {% endblock %}
 </body>
-<hr>
-{% endblock %}
+
 </html>
+
