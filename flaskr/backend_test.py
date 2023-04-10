@@ -41,7 +41,8 @@ class TestBackend(unittest.TestCase):
             fake_file = open("fakefile")
             fake_file.content_type = '.txt'
             self.backend.upload('test-game', fake_file)
-            assert self.backend.get_wiki_page('test-game') == b'test title'
+            result, r_type = self.backend.get_wiki_page('test-game')
+            assert result == b'test title'
         mock_file.assert_called_with("fakefile")
     
     def test_get_image(self):
@@ -69,7 +70,7 @@ class TestBackend(unittest.TestCase):
         self.mock_blob.download_as_string.return_value = b'Test content' #set it so that it returns this string
         self.backend.bucket.blob = MagicMock(return_value=self.mock_blob) #inject it
 
-        result = self.backend.get_wiki_page(name) #save the result after calling the function
+        result, r_type = self.backend.get_wiki_page(name) #save the result after calling the function
 
         self.assertEqual(result, b'Test content') #assert
 

@@ -78,7 +78,7 @@ def make_endpoints(app):
             session['username'] = username #adds the username to the session
             return redirect('/')
         return render_template('signup.html')        
-        
+      
     @app.route('/pages')
     def pages():
         backend = Backend("contentwiki") #Call the backend with the buckets name
