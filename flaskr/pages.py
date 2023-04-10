@@ -94,9 +94,7 @@ def make_endpoints(app):
                 return render_template('signup.html', info=info)      
 
  
-            info = b.sign_up(
-                username, password, email
-            )  #passes the unsername and password entered to the signup function in Backend class
+            info = b.sign_up(username, password, email)  #passes the unsername and password entered to the signup function in Backend class
 
             if info == 'Username already exsists':
                 return render_template('signup.html', info=info)

@@ -29,7 +29,7 @@ def test_home(client):
     resp = client.get("/")
     assert resp.status_code == 200
     response = resp.data.decode('utf-8')
-    login = '<a href="/login">Login</a>\n'
+    login = '<a href="/login">Login</a>'
     assert login in response
 
     # set user as logged in
@@ -38,7 +38,7 @@ def test_home(client):
 
     # get home page, assert it was successful and that the user has option to logout within the page contents
     resp = client.get("/").data.decode('utf-8')
-    user =  '<a> | me |</a>'
+    user =  '<a>| me |</a>'
     logout = '<a href="/logout">Logout</a>'
     assert user in resp 
     assert logout in resp
@@ -46,7 +46,7 @@ def test_home(client):
 def test_about(client):
     # get about page and assert information about wiki is returned
     resp = client.get("/about").data.decode('utf-8')
-    about = '<p> This wiki serves as a hub to all things video games! </p>'
+    about = '<h3> This wiki serves as a hub to all things video games! </h3>'
     assert about in resp
 
 def test_upload(client):
@@ -89,13 +89,66 @@ def test_logout(client):
 def test_pages_page(client): #Test if the pages html actually displays the actual pages
     resp = client.get("/pages")
     assert resp.status_code == 200
-    assert b"<h3>Pages Contained in this Wiki</h3>" in resp.data
+    assert b"<h1>Pages Contained in this Wiki</h1>" in resp.data
     assert b"<a href=\"/pages/" in resp.data
 
 def test_signup_route(client): #Tests if the signup page is routing properly and it displays the intended message 
     resp = client.get("/signup").data.decode('utf-8')
     assert '<p>Please fill in this form to create an account.</p>' in resp
 
+
 def test_signin_route(client): #Tests if the signup page is routing properly and it displays the intended message 
     resp = client.get("/login").data.decode('utf-8')
     assert '<p>Please fill in this form to sign in to your account.</p>' in resp
+
+def test_valid_email(client):
+    with client.session_transaction() as session:
+        session['username'] = None
+
+    data = {
+        'name': 'testuser',
+        'psw': 'Password123@',
+        'email_add': 'testuser@test.com'
+    }
+    resp = client.post('/signup', data=data, follow_redirects=True)
+
+    assert b"Invalid Email" not in resp.data
+
+def test_invalid_email(client):
+    with client.session_transaction() as session:
+        session['username'] = None
+
+    data = {
+        'name': 'testuser',
+        'psw': 'Password123@',
+        'email_add': 'testusertest.com'
+    }
+    resp = client.post('/signup', data=data, follow_redirects=True)
+
+    assert b"Invalid Email" in resp.data
+
+def test_valid_password(client):
+    with client.session_transaction() as session:
+        session['username'] = None
+
+    data = {
+        'name': 'testuser',
+        'psw': 'Password123@',
+        'email_add': 'testuser@test.com'
+    }
+    resp = client.post('/signup', data=data, follow_redirects=True)
+
+    assert b"Invalid Password" not in resp.data
+
+def test_invalid_password(client):
+    with client.session_transaction() as session:
+        session['username'] = None
+
+    data = {
+        'name': 'testuser',
+        'psw': 'password',
+        'email_add': 'testuser@test.com'
+    }
+    resp = client.post('/signup', data=data, follow_redirects=True)
+
+    assert b"Invalid Password" in resp.data

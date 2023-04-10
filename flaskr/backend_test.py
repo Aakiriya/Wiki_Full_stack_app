@@ -41,7 +41,8 @@ class TestBackend(unittest.TestCase):
             fake_file = open("fakefile")
             fake_file.content_type = '.txt'
             self.backend.upload('test-game', fake_file)
-            assert self.backend.get_wiki_page('test-game') == b'test title'
+            result, r_type = self.backend.get_wiki_page('test-game')
+            assert result == b'test title'
         mock_file.assert_called_with("fakefile")
     
     def test_get_image(self):
@@ -69,7 +70,7 @@ class TestBackend(unittest.TestCase):
         self.mock_blob.download_as_string.return_value = b'Test content' #set it so that it returns this string
         self.backend.bucket.blob = MagicMock(return_value=self.mock_blob) #inject it
 
-        result = self.backend.get_wiki_page(name) #save the result after calling the function
+        result, r_type = self.backend.get_wiki_page(name) #save the result after calling the function
 
         self.assertEqual(result, b'Test content') #assert
 
@@ -99,8 +100,8 @@ class TestBackend(unittest.TestCase):
 
     def test_signin_success(self):
         backend = Backend('bucket_name')
-        backend.sign_up('testuser', 'testpassword')
-        
+        backend.sign_up('testuser', 'Password123@', 'testuser@test.com')
+
         # Mock the bucket and blob objects
         mock_bucket = MagicMock()
         mock_blob = MagicMock()
@@ -134,10 +135,11 @@ class TestBackend(unittest.TestCase):
 
     def test_sign_up_success(self):
         user_name = 'testuser'
-        password = 'testpassword'
+        password = 'Password123@'
+        email = 'testuser@test.com'
 
         # Call the sign_up function
-        self.backend.sign_up(user_name, password)
+        self.backend.sign_up(user_name, password, email)
 
         # Assert that the blob was created with the correct name and contents
         expected_password = '4f14e966d574cb671b0b5d8beb776ab0' # hashed version of 'testpassword5gz'

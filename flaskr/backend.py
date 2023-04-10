@@ -41,24 +41,44 @@ class Backend:
         with blob.open("wb") as f: # write page contents to blob in cloud
             f.write(page.read())
  
-    def sign_up(self,user_name, pwd):     
-        # get username, password from user, salt for hashing   
-        name = user_name 
+    def sign_up(self, user_name, pwd, email):
+        # get username, password from user, salt for hashing
+        name = user_name
         password = pwd
         salt = "5gz"
 
         # Adding salt at the last of the password
-        dataBase_password = password+salt
+        dataBase_password = password + salt
         # Encoding the password
         hashed_password = hashlib.md5(dataBase_password.encode())
-    
+
         bucket = client.bucket('userspasswords')
+        bucket2 = client.bucket('bio_and_gamepreferences')
+        blob2 = bucket2.blob(name) 
         blob = bucket.blob(name)
 
-        #Adds the encoded passsword to the created user blob
-        with blob.open("w") as f:
-            f.write(f"{hashed_password.hexdigest()}")
+        if blob.exists():
+            return 'Username already exsists'
 
+        else:
+        #Adds the encoded passsword to the created user blob
+            with blob.open("w") as f:
+                f.write(f"{hashed_password.hexdigest()},{email}")
+            with blob2.open("w") as f:
+                f.write(f"{name} hasn't added a bio,{name} hasn't added any favorite games,{name} hasn't added any favorite genres,{name} hasn't added any favorite developers,default_pic")
+                return None
+
+
+        if blob.exists():
+            return 'Username already exsists'
+
+        else:
+        #Adds the encoded passsword to the created user blob
+            with blob.open("w") as f:
+                f.write(f"{hashed_password.hexdigest()},{email}")
+            with blob2.open("w") as f:
+                f.write(f"{name} hasn't added a bio,{name} hasn't added any favorite games,{name} hasn't added any favorite genres,{name} hasn't added any favorite developers,default_pic")
+                return None
 
     def sign_in(self,user_name, pwd):       
         # get username, password from user, salt for hashing   
