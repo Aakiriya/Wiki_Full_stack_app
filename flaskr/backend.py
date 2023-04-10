@@ -41,7 +41,7 @@ class Backend:
         with blob.open("wb") as f:  # write page contents to blob in cloud
             f.write(page.read())
 
-    def sign_up(self, user_name, pwd):
+    def sign_up(self, user_name, pwd, email):
         # get username, password from user, salt for hashing
         name = user_name
         password = pwd
@@ -53,11 +53,20 @@ class Backend:
         hashed_password = hashlib.md5(dataBase_password.encode())
 
         bucket = client.bucket('userspasswords')
+        bucket2 = client.bucket('bio_and_gamepreferences')
+        blob2 = bucket2.blob(name) 
         blob = bucket.blob(name)
 
+        if blob.exists():
+            return 'Username already exsists'
+
+        else:
         #Adds the encoded passsword to the created user blob
-        with blob.open("w") as f:
-            f.write(f"{hashed_password.hexdigest()}")
+            with blob.open("w") as f:
+                f.write(f"{hashed_password.hexdigest()},{email}")
+            with blob2.open("w") as f:
+                f.write(f"{name} hasn't added a bio,{name} hasn't added any favorite games,{name} hasn't added any favorite genres,{name} hasn't added any favorite developers,default_pic")
+                return None
 
     def sign_in(self, user_name, pwd):
         # get username, password from user, salt for hashing
@@ -78,8 +87,8 @@ class Backend:
             return 'Invalid User'
         else:
             with blob.open("r") as f:
-                psw = f.read()  # reads the stored password from the blob
-            if hashed_password.hexdigest() != psw:
+                psw = f.read().split(',')  # reads the stored password from the blob
+            if hashed_password.hexdigest() != psw[0]:
                 return 'Invalid Password'
             else:
                 return username
@@ -103,3 +112,27 @@ class Backend:
             if blob.name == image_name:
                 with blob.open("rb") as b:
                     return decode_img(b)
+
+    def profile(self, user_name):
+        bucket = client.bucket('userspasswords')
+        bucket2 = client.bucket('bio_and_gamepreferences')
+        blob2 = bucket2.blob(user_name) 
+        blob = bucket.blob(user_name)
+
+        with blob.open("r") as f:
+            account_details = f.read().split(',')
+
+        with blob2.open("r") as f:
+            bio_details = f.read().split(',')
+
+        profile_details = account_details + bio_details
+        
+        return profile_details
+
+    def editprofile(self, user_name, profile_details):
+        bucket = client.bucket('userspasswords')
+        bucket2 = client.bucket('bio_and_gamepreferences')
+        blob2 = bucket2.blob(user_name) 
+        blob = bucket.blob(user_name)     
+        
+        pass

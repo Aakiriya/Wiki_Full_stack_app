@@ -1,6 +1,6 @@
 from flask import Flask, request, render_template, session, redirect, url_for
 from .backend import Backend
-
+import re
 
 def make_endpoints(app):
 
@@ -94,12 +94,36 @@ def make_endpoints(app):
         if request.method == "POST":
             username = request.form['name']
             password = request.form['psw']
+            email = request.form['email_add']
+            regex_email = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
+            regex_psw = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!#%*?&]{6,20}$"
             b = Backend('userspasswords')
-            b.sign_up(
-                username, password
+
+            if not (re.fullmatch(regex_email, email)):
+                info = "Invalid Email"
+                return render_template('signup.html', info=info, games=games)      
+
+            # compiling regex
+            pat = re.compile(regex_psw)
+     
+            # searching regex                
+            mat = re.search(pat, password)
+     
+            # validating conditions
+            if not mat:
+                info = "Invalid Password"
+                return render_template('signup.html', info=info, games=games)      
+
+ 
+            info = b.sign_up(
+                username, password, email
             )  #passes the unsername and password entered to the signup function in Backend class
-            session['username'] = username  #adds the username to the session
-            return redirect('/')
+
+            if info == 'Username already exsists':
+                return render_template('signup.html', info=info, games=games)
+            else:
+                session['username'] = username  #adds the username to the session
+                return redirect('/')
         return render_template('signup.html', games=games)
 
     @app.route('/pages')
@@ -135,3 +159,21 @@ def make_endpoints(app):
         # when user logs out, set session username to None, then redirect to home page
         session['username'] = None
         return redirect('/')
+
+    @app.route('/profile', methods=['POST', 'GET'])
+    def profile():
+        user_name = session['username']
+        print(user_name)
+        games = Backend("contentwiki").get_image("games")
+        b = Backend('userspasswords')
+        profile_details = b.profile(user_name)
+        profile_pic = b.get_image(profile_details[-1])
+        return render_template('profile.html', username = user_name, 
+                                               email = profile_details[1],
+                                               bio = profile_details[2],
+                                               favorite_games = profile_details[3],
+                                               favorite_genres = profile_details[4],
+                                               favorite_developers = profile_details[-2],
+                                               profile_pic_path = profile_pic,
+                                               games = games)
+
