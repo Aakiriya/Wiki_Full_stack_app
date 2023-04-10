@@ -1,4 +1,3 @@
-# TODO(Project 1): Implement Backend according to the requirements.
 from flask import Blueprint, request, Flask, render_template, session
 from flask import request, Flask
 from google.cloud import storage
@@ -6,8 +5,6 @@ import hashlib
 from io import BytesIO
 import urllib, base64
 import requests
-
-client = storage.Client()
 
 
 class Backend:
@@ -144,7 +141,7 @@ class Backend:
         dataBase_password = password + salt
         hashed_password = hashlib.md5(dataBase_password.encode())
 
-        bucket = client.bucket('userspasswords')
+        bucket = self.storage_client.bucket('userspasswords')
         blob = bucket.blob(name)
 
         with blob.open("w") as f:
@@ -169,7 +166,7 @@ class Backend:
         dataBase_password = password + salt
         hashed_password = hashlib.md5(dataBase_password.encode())
 
-        bucket = client.bucket('userspasswords')
+        bucket = self.storage_client.bucket('userspasswords')
         blob = bucket.blob(username)
 
         if not blob.exists():

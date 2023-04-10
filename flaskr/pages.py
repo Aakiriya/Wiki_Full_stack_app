@@ -102,8 +102,7 @@ def make_endpoints(app):
         Args: None
         Returns:
             - Redirects to home page if username-password combination is correct
-            - Redirect to login page with "Invalid User" or "Invalid Password" message if the username or password is incorrect,
-            respectively
+            - Redirect to login page with "Invalid User" or "Invalid Password" message if the username or password is incorrect, respectively
         """
         games = Backend("contentwiki").get_image("games")
         if request.method == "POST":

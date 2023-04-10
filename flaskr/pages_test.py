@@ -24,11 +24,12 @@ def client(app):
 
 
 def test_home_logged_out(client):
-    # set user as not logged in
+    """ Sets the session so that no user is logged in, then retrieves the home page and asserts that the user has option to login
+    (meaning that they are currently logged out) within the page contents
+    """
     with client.session_transaction() as session:
         session['username'] = None
 
-    # get home page, assert it was successful and that the user has option to login within the page contents
     with mock.patch('flaskr.backend.storage.Client'):
         resp = client.get("/")
         response = resp.data.decode('utf-8')
@@ -37,11 +38,12 @@ def test_home_logged_out(client):
 
 
 def test_home_logged_in(client):
-    # set user as logged in
+    """ Sets the user as logged in, retrieves the home page, and asserts that the user has option to logout (meaning they are currently
+    logged in) within the page contents
+    """
     with client.session_transaction() as session:
         session['username'] = 'me'
 
-    # get home page, assert it was successful and that the user has option to logout within the page contents
     with mock.patch('flaskr.backend.storage.Client'):
         resp = client.get("/").data.decode('utf-8')
         user = '<a> | me |</a>'
@@ -50,7 +52,7 @@ def test_home_logged_in(client):
 
 
 def test_about(client):
-    # get about page and assert information about wiki is returned
+    """ Retrieves the about page and asserts that the correct wiki description appears on the page contents """
     with mock.patch('flaskr.backend.storage.Client'):
         resp = client.get("/about").data.decode('utf-8')
         about = '<p> This wiki serves as a hub to all things video games! </p>'
@@ -58,15 +60,15 @@ def test_about(client):
 
 
 def test_upload_error_file(client):
-    # get upload route and assert "file is incorrect"
+    """ Gets upload route and asserts correct error message is displayed for a file error """
     with mock.patch('flaskr.backend.storage.Client'):
         resp = client.post("/upload").data.decode('utf-8')
         assert "File was not uploaded correctly." in resp
 
 
 def test_upload_no_file(client):
+    """ Gets upload route and asserts correct error message is displayed for no file found """
     data = {'file': (io.BytesIO(b"text data"), ''), 'filename': 'test'}
-    # get upload route with no file supplied and assert to upload file
     with mock.patch('flaskr.backend.storage.Client'):
         resp = client.post("/upload",
                            data=data,
@@ -75,7 +77,7 @@ def test_upload_no_file(client):
 
 
 def test_upload_wrong_file(client):
-    # get upload route and pass in incorrect file extension, assert that the file type is not supported
+    """ Gets upload route and asserts correct error message is displayed for unsupported file extension """
     data = {'file': (io.BytesIO(b"text data"), 'test.idk'), 'filename': 'test'}
     with mock.patch('flaskr.backend.storage.Client'):
         resp = client.post("/upload",
@@ -85,7 +87,7 @@ def test_upload_wrong_file(client):
 
 
 def test_upload_success(client):
-    # get upload route and pass in correct file type, assert upload was successful
+    """ Gets upload route and asserts success message is displayed for a successful file upload """
     data = {'file': (io.BytesIO(b"text data"), 'test.txt'), 'filename': 'test'}
     with mock.patch('flaskr.backend.storage.Client'):
         resp = client.post("/upload",
@@ -95,38 +97,34 @@ def test_upload_success(client):
 
 
 def test_logout(client):
-    # set up user as logged in
+    """ Sets up user as logged in, calles the /logout route and asserts the session's user is None (meaning the user is logged out) """
     with client.session_transaction() as sess:
         sess['username'] = "beth"
 
-    # get logout route
     resp = client.get("/logout")
     assert "redirect" in resp.data.decode('utf-8')
 
-    # assert user is logged out
     with client.session_transaction() as sess:
         assert sess['username'] is None
 
 
-def test_pages(
-        client):  #Test if the pages html actually displays the actual pages
+def test_pages(client):
+    """ Test if the pages html actually displays the actual pages """
     with mock.patch('flaskr.backend.storage.Client'):
         resp = client.get("/pages")
         assert resp.status_code == 200
         assert b"Pages" in resp.data
 
 
-def test_signup_route(
-    client
-):  #Tests if the signup page is routing properly and it displays the intended message
+def test_signup_route(client):
+    """ Tests if the signup page is routing properly and it displays the intended message """
     with mock.patch('flaskr.backend.storage.Client'):
         resp = client.get("/signup").data.decode('utf-8')
         assert '<p>Please fill in this form to create an account.</p>' in resp
 
 
-def test_signin_route(
-    client
-):  #Tests if the signup page is routing properly and it displays the intended message
+def test_signin_route(client):
+    """ Tests if the signup page is routing properly and it displays the intended message """
     with mock.patch('flaskr.backend.storage.Client'):
         resp = client.get("/login").data.decode('utf-8')
         assert '<p>Please fill in this form to sign in to your account.</p>' in resp
