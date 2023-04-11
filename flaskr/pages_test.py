@@ -141,9 +141,9 @@ def test_valid_email(client):
         'psw': 'Password123@',
         'email_add': 'testuser@test.com'
     }
-    resp = client.post('/signup', data=data, follow_redirects=True)
-
-    assert b"Invalid Email" not in resp.data
+    with mock.patch('flaskr.backend.storage.Client'):
+        resp = client.post('/signup', data=data, follow_redirects=True)
+        assert b"Invalid Email" not in resp.data
 
 
 def test_invalid_email(client):
@@ -169,9 +169,9 @@ def test_valid_password(client):
         'psw': 'Password123@',
         'email_add': 'testuser@test.com'
     }
-    resp = client.post('/signup', data=data, follow_redirects=True)
-
-    assert b"Invalid Password" not in resp.data
+    with mock.patch('flaskr.backend.storage.Client'):
+        resp = client.post('/signup', data=data, follow_redirects=True)
+        assert b"Invalid Password" not in resp.data
 
 
 def test_invalid_password(client):
