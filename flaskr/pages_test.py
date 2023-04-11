@@ -126,7 +126,7 @@ def test_signup_route(client):
 
 
 def test_signin_route(client):
-    """ Tests if the signup page is routing properly and it displays the intended message """
+    """ Tests if the signup page is routing properly and it display the intended message """
     with mock.patch('flaskr.backend.storage.Client'):
         resp = client.get("/login").data.decode('utf-8')
         assert '<p>Please fill in this form to sign in to your account.</p>' in resp
