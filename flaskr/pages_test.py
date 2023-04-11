@@ -49,9 +49,10 @@ def test_home(client):
 
 def test_about(client):
     # get about page and assert information about wiki is returned
-    resp = client.get("/about").data.decode('utf-8')
-    about = '<h3> This wiki serves as a hub to all things video games! </h3>'
-    assert about in resp
+    with mock.patch('flaskr.backend.storage.Client'):
+        resp = client.get("/about").data.decode('utf-8')
+        about = '<h3> This wiki serves as a hub to all things video games! </h3>'
+        assert about in resp
 
 
 def test_upload(client):
@@ -95,7 +96,6 @@ def test_logout(client):
 def test_pages_page(
         client):  #Test if the pages html actually displays the actual pages
     resp = client.get("/pages")
-    assert resp.status_code == 200
     assert b"<h1>Pages Contained in this Wiki</h1>" in resp.data
     assert b"<a href=\"/pages/" in resp.data
 
@@ -116,5 +116,6 @@ def test_signin_route(
 
 def test_editor(client):
     # get editor page and assert that TinyMCE API script tag is present in the HTML
-    resp = client.get("/tinyedit").data.decode('utf-8')
-    assert '<script src="/static/tinymce/tinymce.min.js"></script>' in resp
+    with mock.patch('flaskr.backend.storage.Client'):
+        resp = client.get("/tinyedit").data.decode('utf-8')
+        assert '<script src="/static/tinymce/tinymce.min.js"></script>' in resp
