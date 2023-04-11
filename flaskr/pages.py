@@ -112,7 +112,7 @@ def make_endpoints(app):
         content, mime_type = backend.get_wiki_page(name)
         page_title = f'{name}'
         if content is not None:
-            return render_template('page.html',
+            return render_template('pages.html',
                                    content=content.decode(),
                                    page_title=page_title)
         else:

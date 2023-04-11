@@ -5,6 +5,9 @@
         {% if pages %}
             <h1>Pages Contained in this Wiki</h1>
         {% endif %}
+        {% if content %}
+        {{ content|safe }}
+        {% endif %}
     </div>
     <div>
         {% if pages %}
