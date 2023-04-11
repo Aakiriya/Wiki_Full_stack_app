@@ -133,17 +133,18 @@ def test_signin_route(client):
 
 
 def test_valid_email(client):
+    # with mock.patch('flaskr.backend.storage.Client'):
     with client.session_transaction() as session:
         session['username'] = None
 
     data = {
-        'name': 'testuser',
+        'name': None,
         'psw': 'Password123@',
         'email_add': 'testuser@test.com'
     }
-    with mock.patch('flaskr.backend.storage.Client'):
-        resp = client.post('/signup', data=data, follow_redirects=True)
-        assert b"Invalid Email" not in resp.data
+
+    resp = client.post('/signup', data=data, follow_redirects=True)
+    assert b"Invalid Email" not in resp.data
 
 
 def test_invalid_email(client):
@@ -165,13 +166,12 @@ def test_valid_password(client):
         session['username'] = None
 
     data = {
-        'name': 'testuser',
+        'name': None,
         'psw': 'Password123@',
         'email_add': 'testuser@test.com'
     }
-    with mock.patch('flaskr.backend.storage.Client'):
-        resp = client.post('/signup', data=data, follow_redirects=True)
-        assert b"Invalid Password" not in resp.data
+    resp = client.post('/signup', data=data, follow_redirects=True)
+    assert b"Invalid Password" not in resp.data
 
 
 def test_invalid_password(client):
