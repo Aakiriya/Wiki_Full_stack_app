@@ -163,11 +163,11 @@ def make_endpoints(app):
     @app.route('/profile', methods=['POST', 'GET'])
     def profile():
         user_name = session['username']
-        print(user_name)
         games = Backend("contentwiki").get_image("games")
-        b = Backend('userspasswords')
-        profile_details = b.profile(user_name)
-        profile_pic = b.get_image(profile_details[-1])
+        b1 = Backend('userspasswords')
+        b2 = Backend('contentwiki')
+        profile_details = b1.profile(user_name)
+        profile_pic = b2.get_image(profile_details[-1])
         return render_template('profile.html', username = user_name, 
                                                email = profile_details[1],
                                                bio = profile_details[2],
@@ -177,3 +177,64 @@ def make_endpoints(app):
                                                profile_pic_path = profile_pic,
                                                games = games)
 
+    
+    @app.route('/editprofile', methods=['GET', 'POST'])
+    def edit_profile():
+        games = Backend("contentwiki").get_image("games")
+        b = Backend('userspasswords')
+        user_name = session['username']
+        if request.method == 'POST':
+            email = request.form.get('email')
+            bio = request.form.get('bio')
+            favorite_games = request.form.get('favorite_games')
+            favorite_genres = request.form.get('favorite_genres')
+            favorite_developers = request.form.get('favorite_developers')
+            # process the form data and save the changes to the database
+            profile_details = []
+            profile_details.append(email)
+            profile_details.append(bio)
+            profile_details.append(favorite_games)
+            profile_details.append(favorite_genres)
+            profile_details.append(favorite_developers)
+
+            b.editprofile(user_name, profile_details)
+            return redirect('/profile')
+            
+        return render_template('editprofile.html', email='', bio='', favorite_games='', favorite_genres='', favorite_developers='', games=games)
+
+    @app.route('/editprofilepic', methods=['GET', 'POST'])
+    def avatar_selection():
+        games = Backend("contentwiki").get_image("games")
+        b1 = Backend('userspasswords')
+        user_name = session['username']
+        b2 = Backend('contentwiki')
+
+        avatar1 = b2.get_image('avatar1')
+        avatar2 = b2.get_image('avatar2')
+        avatar3 = b2.get_image('avatar3')
+        avatar4 = b2.get_image('avatar4')
+        avatar5 = b2.get_image('avatar5')
+        avatar6 = b2.get_image('avatar6')
+        avatar7 = b2.get_image('avatar7')
+        avatar8 = b2.get_image('avatar8')
+        avatar9 = b2.get_image('avatar9')
+        avatar10 = b2.get_image('avatar10')
+
+        if request.method == 'POST':
+            selected_avatar = request.form['avatar']
+            print(selected_avatar, "gnrkdvlllffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
+            b1.editprofilepic(user_name, selected_avatar)
+            return redirect('/profile')
+
+        return render_template('editprofilepic.html',
+                                Avatar1=avatar1,
+                                Avatar2=avatar2,
+                                Avatar3=avatar3,
+                                Avatar4=avatar4,
+                                Avatar5=avatar5,
+                                Avatar6=avatar6,
+                                Avatar7=avatar7,
+                                Avatar8=avatar8,
+                                Avatar9=avatar9,
+                                Avatar10=avatar10,
+                                games=games)
