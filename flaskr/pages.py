@@ -31,9 +31,17 @@ def make_endpoints(app):
 
     @app.route("/upload", methods=['GET', 'POST'])
     def upload_file():
-        # gets background image
+        """ Retrieve the file and wikipage name the user supplied in the form. Ensures the file was successfully retrieved and of valid
+        type, then uses the wikipage name (representing the game's title) to search for valid genres associated with the game. For each
+        valid genre, adds the genre along with the wikipage name to the Genres bucket, then adds the game to the contentwiki Bucket
+        Args: None
+        Returns:
+            - "File was not uploaded correctly. Please try again." if no file is found in request/request made incorrectly
+            - "Please upload a file." if no file found in request + wiki page name was supplied
+            - "Uploaded successfully." if file and wiki page name was uploaded to the cloud successfully.
+
+        """
         games = Backend("contentwiki").get_image("games")
-        # sets allowed file types, messages to return based on situation
         allowed_ext = {'txt', 'png', 'jpg', 'jpeg'}
         message = [
             "File was not uploaded correctly. Please try again.",
@@ -42,14 +50,12 @@ def make_endpoints(app):
         ]
 
         if request.method == 'POST':
-            # if no file is found in request/request made incorrectly, return first error message
             if 'file' not in request.files:
                 return render_template("upload.html",
                                        message=message[0],
                                        games=games)
             file = request.files['file']
 
-            # if no file found in request + wiki page name was supplied, return second error message
             if file.filename == "":
                 return render_template("upload.html",
                                        message=message[1],
@@ -59,14 +65,27 @@ def make_endpoints(app):
                                        message=message[2],
                                        games=games)
 
-            # if file is correct, pass file and filename to upload() function and return success message
             elif file:
+                game_title = request.form.get("filename")
                 b = Backend("contentwiki")
-                b.upload(request.form.get("filename"), file)
+                genres = b.get_genre(game_title)
+                g = Backend("game-genres")
+                if type(genres) is list:
+                    for genre in genres:
+                        g.upload_genre(genre, game_title)
+                else:
+                    pass
+                    # genre has either returned "Could not find genres for title." (title is correct, however no genres on database)
+                    # or "Title not found." (title not in database)
+                    # add functionality to communicate this to the user via popup, and allow them to either continue the upload
+                    # as-is (no genre) or to edit the title and upload
+                g.upload_genre("*All*", game_title)
+                b.upload(game_title, file)
                 return render_template("upload.html",
                                        message=message[3],
                                        games=games)
         return render_template("upload.html", games=games)
+
 
     @app.route('/login', methods=['POST', 'GET'])
     def sign_in():
@@ -95,26 +114,8 @@ def make_endpoints(app):
             username = request.form['name']
             password = request.form['psw']
             email = request.form['email_add']
-            regex_email = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
-            regex_psw = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!#%*?&]{6,20}$"
-            b = Backend('userspasswords')
-
-            if not (re.fullmatch(regex_email, email)):
-                info = "Invalid Email"
-                return render_template('signup.html', info=info, games=games)      
-
-            # compiling regex
-            pat = re.compile(regex_psw)
-     
-            # searching regex                
-            mat = re.search(pat, password)
-     
-            # validating conditions
-            if not mat:
-                info = "Invalid Password"
-                return render_template('signup.html', info=info, games=games)      
-
- 
+            b = Backend('userspasswords')                                              
+            
             info = b.sign_up(
                 username, password, email
             )  #passes the unsername and password entered to the signup function in Backend class
@@ -220,12 +221,48 @@ def make_endpoints(app):
         avatar9 = b2.get_image('avatar9')
         avatar10 = b2.get_image('avatar10')
 
-        if request.method == 'POST':
-            selected_avatar = request.form['avatar']
-            print(selected_avatar, "gnrkdvlllffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
-            b1.editprofilepic(user_name, selected_avatar)
-            return redirect('/profile')
+        if request.method =="POST":
+            if request.form.get('avatar1', None) == 'on':
+                selected_avatar = 'avatar1'
+                b1.editprofilepic(user_name, selected_avatar)
 
+            if request.form.get('avatar2', None) == 'on':
+                selected_avatar = 'avatar2'
+                b1.editprofilepic(user_name, selected_avatar)
+
+            if request.form.get('avatar3', None) == 'on':
+                selected_avatar = 'avatar3'
+                b1.editprofilepic(user_name, selected_avatar)
+
+            if request.form.get('avatar4', None) == 'on':
+                selected_avatar = 'avatar4'
+                b1.editprofilepic(user_name, selected_avatar)
+
+            if request.form.get('avatar5', None) == 'on':
+                selected_avatar = 'avatar5'
+                b1.editprofilepic(user_name, selected_avatar)
+
+            if request.form.get('avatar6', None) == 'on':
+                selected_avatar = 'avatar6'
+                b1.editprofilepic(user_name, selected_avatar)
+
+            if request.form.get('avatar7', None) == 'on':
+                selected_avatar = 'avatar7'
+                b1.editprofilepic(user_name, selected_avatar)
+
+            if request.form.get('avatar8', None) == 'on':
+                selected_avatar = 'avatar8'
+                b1.editprofilepic(user_name, selected_avatar)
+
+            if request.form.get('avatar9', None) == 'on':
+                selected_avatar = 'avatar9'
+                b1.editprofilepic(user_name, selected_avatar)
+
+            if request.form.get('avatar10', None) == 'on':
+                selected_avatar = 'avatar10'
+                b1.editprofilepic(user_name, selected_avatar)
+            return redirect('/profile')
+        
         return render_template('editprofilepic.html',
                                 Avatar1=avatar1,
                                 Avatar2=avatar2,
