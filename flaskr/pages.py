@@ -53,7 +53,7 @@ def make_endpoints(app):
             if file.filename == "":
                 return render_template("upload.html",
                                        message=message[1],
-                                       games=games) 
+                                       games=games)
             ext = file.filename.split('.')[1]
             if ext not in allowed_ext:
                 return render_template("upload.html",
@@ -67,8 +67,8 @@ def make_endpoints(app):
                 if ext == 'html' or ext == 'txt':
                     b.upload(page_name, b.sanitize(file))
                     return render_template("upload.html",
-                                        message=message[3],
-                                        games=games)
+                                           message=message[3],
+                                           games=games)
         return render_template("upload.html", games=games)
 
     @app.route('/login', methods=['POST', 'GET'])

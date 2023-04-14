@@ -196,7 +196,5 @@ class TestBackend(unittest.TestCase):
         assert self.backend.sanitize(temp_file) == text
 
 
-
-
 if __name__ == '__main__':
     unittest.main()
