@@ -1,5 +1,5 @@
 from flask import Flask, request, render_template, session, redirect, url_for
-from .backend import Backend
+from .backend import Backend, NoGenresFoundException
 
 
 def make_endpoints(app):
@@ -76,14 +76,14 @@ def make_endpoints(app):
             elif file:
                 game_title = request.form.get("filename")
                 b = Backend("contentwiki")
-                genres = b.get_genre(game_title)
                 g = Backend("game-genres")
-                if type(genres) is list:
+                try:
+                    genres = b.get_genre(game_title)
                     for genre in genres:
                         g.upload_genre(genre, game_title)
-                else:
+                except NoGenresFoundException:
+                    # TODO(rakshith): Display popup when we fail to find genres for a game.
                     pass
-                    # popup here
                 g.upload_genre("*All*", game_title)
                 b.upload(game_title, file)
                 return render_template("upload.html",

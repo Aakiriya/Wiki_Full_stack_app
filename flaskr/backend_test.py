@@ -4,13 +4,13 @@ from unittest.mock import Mock, MagicMock, mock_open, patch
 import hashlib
 from google.cloud import storage
 from flask import Flask
-from .backend import Backend
+from .backend import Backend, NoGenresFoundException
 
 
 class TestBackend(unittest.TestCase):
 
     def setUp(self):
-        """ Sets up necessary attributes to use for testing.
+        """ Sets up the necessary attributes to use for testing.
         Args:
             bucket_name: mock bucket
             backend: injects the mock bucket into class Backend
@@ -181,23 +181,23 @@ class TestBackend(unittest.TestCase):
     def test_get_genre_success(self):
         """ Creates a test bucket and asserts the valid game title returns the expected genres """
         b = Backend('test-bucket')
-        test_title = "FIFA 23"
-        actual = ['Simulator', 'Sport']
+        test_title = "Call of Duty: Warzone"
+        actual = ['Shooter']
         assert b.get_genre(test_title) == actual
 
     def test_get_genre_invalid_title(self):
-        """ Creates a test bucket and asserts the invalid game title returns that no title was found """
+        """ Creates a test bucket and asserts that an error is thrown for invalid title """
         b = Backend('test-bucket')
         test_title = "not a title"
-        actual = "Title not found."
-        assert b.get_genre(test_title) == actual
+        with self.assertRaises(NoGenresFoundException):
+            b.get_genre(test_title)
 
     def test_get_genre_no_genres(self):
-        """ Creates a test bucket and asserts the valid game title returns that no genres were found """
+        """ Creates a test bucket and asserts that an error is thrown for valid title with no genres in database """
         b = Backend('test-bucket')
         test_title = "Warzone"
-        actual = "Could not find genres for title."
-        assert b.get_genre(test_title) == actual
+        with self.assertRaises(NoGenresFoundException):
+            b.get_genre(test_title)
 
     def test_upload_genre(self):
         """ Sets mock blob to return a mock game title, then asserts when the title and genre are uploaded, the game title is retrievable """

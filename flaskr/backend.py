@@ -7,6 +7,11 @@ import urllib, base64
 import requests
 
 
+class NoGenresFoundException(Exception):
+    """ Raised when a title is not found or the title is found but there are no provided genres for the title in the IGDB """
+    pass
+
+
 class Backend:
     """
     Class Backend holds the methods to interact with Google Cloud Storage(GCS) and external dependencies such as APIs.
@@ -82,8 +87,7 @@ class Backend:
             title: String representing the name of the game to find genres for
         Returns:
             - List of valid genres if a title is found and genres are found for the title
-            - "Title not found" if API does not find the title
-            - "Could not find genres for title" if title is found but genres are not currently supplied for genre in database
+            - NoGenresFoundException if no genres are found for a title 
         """
         headers = {
             "Client-ID": "lgizwf7xy2tobsd42vbrmna4pgot14",
@@ -105,8 +109,8 @@ class Backend:
                     game_genres.append(r[0]['name'])
                 return game_genres
             except KeyError:
-                return "Could not find genres for title."
-        return "Title not found."
+                raise NoGenresFoundException
+        raise NoGenresFoundException
 
     def upload_genre(self, genre, title):
         """ Uploads the title to its correlating genre in the cloud by retrieving the genre blob content that correlates to the genre name,
