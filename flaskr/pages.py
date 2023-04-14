@@ -53,8 +53,9 @@ def make_endpoints(app):
             if file.filename == "":
                 return render_template("upload.html",
                                        message=message[1],
-                                       games=games)
-            elif file.filename.split('.')[1] not in allowed_ext:
+                                       games=games) 
+            ext = file.filename.split('.')[1]
+            if ext not in allowed_ext:
                 return render_template("upload.html",
                                        message=message[2],
                                        games=games)
@@ -63,12 +64,11 @@ def make_endpoints(app):
             elif file:
                 b = Backend("contentwiki")
                 page_name = request.form.get("filename")
-                if file.filename.split('.')[1] == "html":
-                    file = b.sanitize(file)
-                b.upload(page_name, file)
-                return render_template("upload.html",
-                                       message=message[3],
-                                       games=games)
+                if ext == 'html' or ext == 'txt':
+                    b.upload(page_name, b.sanitize(file))
+                    return render_template("upload.html",
+                                        message=message[3],
+                                        games=games)
         return render_template("upload.html", games=games)
 
     @app.route('/login', methods=['POST', 'GET'])

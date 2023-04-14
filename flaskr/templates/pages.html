@@ -16,7 +16,9 @@
     </div>
     <hr>
    <div>
+    {% if page_content %}
     <p>{{ page_content|safe }}</p>
+    {% endif %}
         {% if pages %}
             <ul>
                 {% for page in pages %}

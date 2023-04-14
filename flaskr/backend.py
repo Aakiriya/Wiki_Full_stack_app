@@ -107,8 +107,7 @@ class Backend:
 
     def sanitize(self, page):
         """ Uses the bleach library to clean the uploaded html based on the allowed tags and attributes and converts the text
-        links to safe links and then upload to cloud
-
+        links to safe links 
         Args:
             page: HTML file to sanitize
         Returns: Sanitized HTML file
