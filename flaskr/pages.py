@@ -1,6 +1,7 @@
 from flask import Flask, request, render_template, session, redirect, url_for
 from .backend import Backend
 import re
+import requests
 
 def make_endpoints(app):
 
@@ -74,17 +75,65 @@ def make_endpoints(app):
                     for genre in genres:
                         g.upload_genre(genre, game_title)
                 else:
-                    pass
+                    # TODO(rakshith): Display popup when we fail to find genres for a game.
+                    return render_template("altupload.html",
+                                        message=genres,
+                                        filename=game_title,
+                                        file=file,
+                                        games=games)
+
                     # genre has either returned "Could not find genres for title." (title is correct, however no genres on database)
                     # or "Title not found." (title not in database)
                     # add functionality to communicate this to the user via popup, and allow them to either continue the upload
                     # as-is (no genre) or to edit the title and upload
-                g.upload_genre("*All*", game_title)
-                b.upload(game_title, file)
-                return render_template("upload.html",
-                                       message=message[3],
-                                       games=games)
         return render_template("upload.html", games=games)
+
+    @app.route("/altupload", methods=['GET', 'POST'])
+    def altupload():
+        games = Backend("contentwiki").get_image("games")
+        allowed_ext = {'txt', 'png', 'jpg', 'jpeg'}
+        message = [
+            "File was not uploaded correctly. Please try again.",
+            "Please upload a file.", "File type not supported.",
+            "Uploaded successfully."
+        ]
+
+        if request.method == 'POST':
+            if 'file' not in request.files:
+                return render_template("altupload.html",
+                                       message=message[0],
+                                       games=games)
+            file = request.files['file']
+
+            if file.filename == "":
+                return render_template("altupload.html",
+                                       message=message[1],
+                                       games=games)
+
+            elif file.filename.split('.')[1] not in allowed_ext:
+                return render_template("altupload.html",
+                                       message=message[2],
+                                       games=games)
+
+            elif file:
+                game_title = request.form.get("filename")
+                b = Backend("contentwiki")
+                genres = b.get_genre(game_title)
+                g = Backend("game-genres")
+                if type(genres) is list:
+                    for genre in genres:
+                        g.upload_genre(genre, game_title)
+                else:
+                    g.upload_genre("*All*", game_title)
+                    b.upload(game_title, file)
+                    return render_template("altupload.html",
+                                        message=message[3],
+                                        games=games)
+                    # genre has either returned "Could not find genres for title." (title is correct, however no genres on database)
+                    # or "Title not found." (title not in database)
+                    # add functionality to communicate this to the user via popup, and allow them to either continue the upload
+                    # as-is (no genre) or to edit the title and upload                
+        return render_template("altupload.html", games=games)
 
 
     @app.route('/login', methods=['POST', 'GET'])
@@ -127,33 +176,51 @@ def make_endpoints(app):
                 return redirect('/')
         return render_template('signup.html', games=games)
 
-    @app.route('/pages')
+    @app.route('/pages', methods=['GET', 'POST'])
     def pages():
-        backend = Backend(
-            "contentwiki")  #Call the backend with the buckets name
-        pages = backend.get_all_page_names(
-        )  #call the get allpages and save the dictionary in pages
-        games = Backend("contentwiki").get_image("games")  #background
-        return render_template(
-            'pages.html', pages=pages,
-            games=games)  #render the pages reading the dictionary
+        """ Get a list of all the genres to display via dropdown on the page upon render. If the user selects a genre, retrieve selected
+        genre and find the games that match the genre from the Genre bucket, then return them hyperlinked (when clicked -> page)  
+        Args: None
+        Returns:
+            - GET: Redirect to Pages page with a dropdown of all possible genres and a list of all game titles
+            - POST: Redirect to Pages page with a dropdown of all possible genres and a list of all game titles matching the selected
+            genre
+        """
+        #
+        backend = Backend("game-genres")
+        genres = backend.get_all_page_names()
+        if request.method == 'GET':
+            genre = "*All*"
+        if request.method == 'POST':
+            genre = request.form.get('genre')
+        pages = backend.bucket.blob(genre).download_as_string().decode('utf-8')
+        games = Backend("contentwiki").get_image("games")
+        return render_template('pages.html',
+                               section=genre,
+                               pages=pages,
+                               genres=genres,
+                               games=games)
 
     @app.route('/pages/<name>')
     def show_page(name):
-        backend = Backend(
-            "contentwiki")  #Call the backend with the buckets name
-        content = backend.get_wiki_page(
-            name)  #send the name of tha page we want ot show
-        games = Backend("contentwiki").get_image("games")  #background
+        """ Call the backend with the page's name to retrieve its contents, then decoded it via UTF-8 and render the page.   
+        Args:
+            name: String representing the name of the desired page
+        Returns:
+            Redirect to page with decoded page content
+        """
+        backend = Backend("contentwiki")
+        content = backend.get_wiki_page(name)
+        games = Backend("contentwiki").get_image("games")
         if content is not None:
-            decoded_content = content.decode(
-                'utf-8')  #decode the text from the page
+            decoded_content = content.decode('utf-8')
             return render_template('pages.html',
                                    page_title=name,
                                    page_content=decoded_content,
-                                   games=games)  #send the text for rendering
+                                   games=games)
         else:
             return f'Page {name} not found'
+
 
     @app.route("/logout")
     def logout():
@@ -163,6 +230,13 @@ def make_endpoints(app):
 
     @app.route('/profile', methods=['POST', 'GET'])
     def profile():
+        """
+        Call the backend to retrieve the user's profile details and the path to their profile picture.
+        Render the profile page with the user's details and profile picture.
+
+        Returns:
+            Rendered template of the user's profile page with the decoded details and picture.
+        """
         user_name = session['username']
         games = Backend("contentwiki").get_image("games")
         b1 = Backend('userspasswords')
@@ -181,6 +255,14 @@ def make_endpoints(app):
     
     @app.route('/editprofile', methods=['GET', 'POST'])
     def edit_profile():
+        """
+        Call the backend to get image 'games' from 'contentwiki' and to retrieve profile information from 'bio_and_gamepreferences'. 
+        If a POST request is received, update the user's profile information and redirect to the profile page.
+        Args:
+            None
+        Returns:
+            Redirect to /profile template with updated profile information.
+        """
         games = Backend("contentwiki").get_image("games")
         b = Backend('userspasswords')
         user_name = session['username']
@@ -205,6 +287,15 @@ def make_endpoints(app):
 
     @app.route('/editprofilepic', methods=['GET', 'POST'])
     def avatar_selection():
+        """
+        Call the backend to get image 'games' from 'contentwiki' and to retrieve the user's profile information and avatar
+        selection from 'userspasswords' and 'contentwiki' respectively. If a POST request is received, update the user's 
+        avatar selection and redirect to the profile page.
+        Args:
+            None
+        Returns:
+            Render the editprofilepic.html template with images for avatar selection and image 'games'.
+        """
         games = Backend("contentwiki").get_image("games")
         b1 = Backend('userspasswords')
         user_name = session['username']

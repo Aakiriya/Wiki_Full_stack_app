@@ -34,6 +34,11 @@ class TestBackend(unittest.TestCase):
         self.mock_blobs = [self.mock_blob1, self.mock_blob2,
                            self.mock_blob3]  #mock bucket with the pages
 
+        self.backend = Backend(self.bucket_name)
+        self.user_name = 'test_user'
+        self.blob_mock = mock.mock_open(read_data='account_details|')
+        self.blob2_mock = mock.mock_open(read_data='bio_details|')
+
     def test_upload(self):
         # set up mock to exist and return 'test title' when blob is attempted to be downloaded
         self.mock_blob.exists.return_value = True
@@ -169,6 +174,29 @@ class TestBackend(unittest.TestCase):
             blob = bucket.blob(user_name)
             blob_contents = blob.download_as_bytes().decode('utf-8')
             self.assertIsNotNone(blob_contents)  # expected_password
+    
+    def test_profile(self):
+        user_name = 'testuser'
+        mock_blob1 = Mock()
+        mock_blob1.exists.return_value = True
+        mock_blob1.download_as_bytes.return_value = b'testpasswordhash'
+        mock_blob2 = Mock()
+        mock_blob2.exists.return_value = True
+        mock_blob2.download_as_bytes.return_value = b'John Doe|25|male|NYC|Strategy,Action'
+
+        with patch('google.cloud.storage.Client'):
+            storage_client = Mock()
+            bucket1 = Mock()
+            bucket1.blob.return_value = mock_blob1
+            bucket2 = Mock()
+            bucket2.blob.return_value = mock_blob2
+            storage_client.bucket.side_effect = [bucket1, bucket2]
+
+            backend = Backend(storage_client)
+            profile_details = backend.profile(user_name)
+
+        expected_details = ['testuser', 'testpasswordhash', 'John Doe', '25', 'male', 'NYC', 'Strategy,Action']
+        self.assertEqual(profile_details, expected_details)
 
 
 if __name__ == '__main__':

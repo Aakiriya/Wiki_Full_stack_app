@@ -1,0 +1,40 @@
+{% extends "main.html" %}
+<style>
+    body{
+        background-image: url("{{games}}");
+        background-size: cover;
+    }
+</style>
+
+{% block page_name %}
+Upload
+{% endblock %}
+
+{% block content %}
+<div>
+<!doctype html>
+<title>Upload</title>
+<h3> Upload a doc to the wiki! </h3>
+</div>
+<hr>
+<div>
+<form method=post enctype=multipart/form-data>
+    <input type='text' name='filename' value= "{{filename}}" required>
+    <input type='file' name='file' value= "{{file}}"> 
+    <input type='submit' value='Upload'>
+</form>
+<p id=message>{{message}}</p>
+</div>
+
+<script>
+window.onload = function() {
+  var message = document.querySelector('#message').innerHTML;
+    if (confirm(message+", Do you want to continue the upload without genre?")) {
+      document.querySelector('form').submit();
+    } else {
+      // disable the form if the user cancels the upload
+      document.querySelector('form input[type="submit"]').disabled = true;
+    }
+}
+</script>
+{% endblock %}

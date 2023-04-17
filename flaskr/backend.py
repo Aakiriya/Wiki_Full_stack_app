@@ -3,6 +3,7 @@ from flask import Blueprint, request, Flask, render_template, session
 from flask import request, Flask
 from google.cloud import storage
 import hashlib
+import requests
 from io import BytesIO
 import urllib, base64
 
@@ -34,12 +35,74 @@ class Backend:
         return pages  #return all the pages
 
     def upload(self, page_name, page):
-        blob = self.bucket.blob(page_name)  # get blob based on page_name
-        img = ["image/jpeg", "image/jpg", "image/png"]  # valid image types
-        if page.content_type in img:  # set content type to image if the page is an image
+        """ Uploads the supplied page by retrieving the blob in the bucket that matches the supplied page_name (or creates
+        the blob if it does not exist). Adds an "image" tag to the blob if the file is type "jpeg", "jpg" or "png", and then
+        writes the page to the blob in cloud.
+        Args:
+            page-name: String representing the name of the wikipage
+            page: File object containing the contents of the wiki page
+        Returns:
+            String contents of the current page if the page exists, if not, returns None
+        """
+        blob = self.bucket.blob(page_name)
+        img = ["image/jpeg", "image/jpg", "image/png"]
+        if page.content_type in img:
             blob.content_type = "image"
-        with blob.open("wb") as f:  # write page contents to blob in cloud
+        with blob.open("wb") as f:
             f.write(page.read())
+
+    def get_genre(self, title):
+        """ Uses the IGDB API to find valid genres for the supplied title name. First uses the /games endpoint to find a matching
+        title based on data where name equals the supplied title. Next, if a title is found, checks to see if genres are associated
+        to that title, and if so, uses the /genres endpoint to translate the genre ID to human-readable genre categories (eg. "Sports")
+        and appends each genre to a list to return
+        Args:
+            title: String representing the name of the game to find genres for
+        Returns:
+            - List of valid genres if a title is found and genres are found for the title
+            - "Title not found" if API does not find the title
+            - "Could not find genres for title" if title is found but genres are not currently supplied for genre in database
+        """
+        headers = {
+            "Client-ID": "lgizwf7xy2tobsd42vbrmna4pgot14",
+            "Authorization": "Bearer rzqcmetxt2td6c5rvuhiq6ytdlc14d"
+        }
+        data = f'fields *; where name = "{title}";'
+        r = requests.post("https://api.igdb.com/v4/games/",
+                          headers=headers,
+                          data=data).json()
+        game_genres = []
+        if len(r) > 0:
+            try:
+                genres = r[0]['genres']
+                for genre in genres:
+                    data = f'fields *; where id = {genre};'
+                    r = requests.post("https://api.igdb.com/v4/genres/",
+                                      headers=headers,
+                                      data=data).json()
+                    game_genres.append(r[0]['name'])
+                return game_genres
+            except KeyError:
+                return "Could not find genres for title."
+        return "Title not found."
+
+    def upload_genre(self, genre, title):
+        """ Uploads the title to its correlating genre in the cloud by retrieving the genre blob content that correlates to the genre name,
+        appending the title name (if there are current titles, else adds the title to content) and writing the content back to the cloud
+        Args:
+            genre: String representing the genre name
+            title: String representing the game name
+        Returns: None
+        """
+        blob = self.bucket.blob(genre)
+        current_blob_content = self.get_wiki_page(genre)
+        if not current_blob_content:
+            current_blob_content = title.encode('utf-8')
+        else:
+            current_blob_content = current_blob_content + (
+                "," + title).encode('utf-8')
+        with blob.open("wb") as f:
+            f.write(current_blob_content)
 
     def sign_up(self, user_name, pwd, email):
         # get username, password from user, salt for hashing
@@ -168,4 +231,3 @@ class Backend:
 
         with blob2.open("w") as f:
             f.write(f'{bio_details[0]}|{bio_details[1]}|{bio_details[2]}|{bio_details[3]}|{bio_details[4]}')
-
