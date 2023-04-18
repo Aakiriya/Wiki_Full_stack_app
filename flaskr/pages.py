@@ -3,7 +3,6 @@ from .backend import Backend
 import re
 
 
-
 def make_endpoints(app):
 
     # Flask uses the "app.route" decorator to call methods when users
