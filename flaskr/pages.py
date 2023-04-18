@@ -54,7 +54,7 @@ def make_endpoints(app):
                 return render_template("upload.html",
                                        message=message[1],
                                        games=games)
-            ext = file.filename.split('.')[1]
+            ext = file.filename.split('.')[-1]
             if ext not in allowed_ext:
                 return render_template("upload.html",
                                        message=message[2],
