@@ -47,25 +47,17 @@ def make_endpoints(app):
             # if no file found in request + wiki page name was supplied, return second error message
             if file.filename == "":
                 return render_template("upload.html", message=message[1])
-
-            #elif file.filename.split('.')[1] not in allowed_ext: old code
-            elif file.filename[len(
-                    file.filename
-            ) - 3:] in allowed_ext and file:  #check last 3 characters for extension 'txt', 'png', 'jpg', 'jpeg'
-                b = Backend("contentwiki")
-                b.upload(request.form.get("filename"), file)
-                return render_template("upload.html", message=message[3])
-
-            elif file.filename[len(
-                    file.filename
-            ) - 4:] in allowed_ext and file:  #check last 4 characters for extension 'html'
-                b = Backend("contentwiki")
-                b.upload(request.form.get("filename"), file)
-                return render_template("upload.html", message=message[3])
-
-            #if the file extension is not in the allowed extension
-            else:
+            ext = file.filename.split('.')[-1]
+            if ext not in allowed_ext:
                 return render_template("upload.html", message=message[2])
+
+            # if file is correct, pass file and filename to upload() function and return success message
+            elif file:
+                b = Backend("contentwiki")
+                page_name = request.form.get("filename")
+                if ext == 'html' or ext == 'txt':
+                    b.upload(page_name, b.sanitize(file))
+                    return render_template("upload.html", message=message[3])
         return render_template("upload.html")
 
     @app.route('/login', methods=['POST', 'GET'])

@@ -1,6 +1,7 @@
 import unittest
 from unittest import mock
 from unittest.mock import Mock, MagicMock, mock_open, patch
+import tempfile
 import hashlib
 from google.cloud import storage
 from flask import Flask
@@ -178,6 +179,30 @@ class TestBackend(unittest.TestCase):
             blob = bucket.blob(user_name)
             blob_contents = blob.download_as_bytes().decode('utf-8')
             self.assertIsNotNone(blob_contents)  # expected_password
+
+    @patch('flaskr.backend.bleach.clean')
+    def test_sanitize(self, mock_bleach):
+        """
+        Assess if sanitized HTML matches the expected sanitized HTML
+        """
+        html = """
+                <h1> Page Title </h1>
+                <script> alert("Boom!")</script>
+                """
+        mock_bleach.return_value = b'&lt;script&gt; alert("Boom!")&lt;/script&gt;\n'
+        assert self.backend.sanitize(
+            html) == b'&lt;script&gt; alert("Boom!")&lt;/script&gt;\n'
+
+    @patch('flaskr.backend.bleach.clean')
+    def test_sanitize_txt(self, mock_bleach):
+        """
+        Checks if .txt file types are sanitized properly
+        """
+        temp_file = tempfile.NamedTemporaryFile()
+        text = b'<script>alert("unsafe txt file!");</script>'
+        temp_file.write(text)
+        mock_bleach.return_value = text
+        assert self.backend.sanitize(temp_file) == text
 
 
 if __name__ == '__main__':
