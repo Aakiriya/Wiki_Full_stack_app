@@ -54,18 +54,20 @@ class Backend:
 
         bucket = client.bucket('userspasswords')
         bucket2 = client.bucket('bio_and_gamepreferences')
-        blob2 = bucket2.blob(name) 
+        blob2 = bucket2.blob(name)
         blob = bucket.blob(name)
 
         if blob.exists():
             return 'Username already exsists'
 
         else:
-        #Adds the encoded passsword to the created user blob
+            #Adds the encoded passsword to the created user blob
             with blob.open("w") as f:
                 f.write(f"{hashed_password.hexdigest()}|{email}")
             with blob2.open("w") as f:
-                f.write(f"{name} hasn't added a bio|{name} hasn't added any favorite games|{name} hasn't added any favorite genres|{name} hasn't added any favorite developers|default_pic")
+                f.write(
+                    f"{name} hasn't added a bio|{name} hasn't added any favorite games|{name} hasn't added any favorite genres|{name} hasn't added any favorite developers|default_pic"
+                )
                 return None
 
     def sign_in(self, user_name, pwd):
@@ -87,7 +89,8 @@ class Backend:
             return 'Invalid User'
         else:
             with blob.open("r") as f:
-                psw = f.read().split('|')  # reads the stored password from the blob
+                psw = f.read().split(
+                    '|')  # reads the stored password from the blob
             if hashed_password.hexdigest() != psw[0]:
                 return 'Invalid Password'
             else:
@@ -116,7 +119,7 @@ class Backend:
     def profile(self, user_name):
         bucket = client.bucket('userspasswords')
         bucket2 = client.bucket('bio_and_gamepreferences')
-        blob2 = bucket2.blob(user_name) 
+        blob2 = bucket2.blob(user_name)
         blob = bucket.blob(user_name)
 
         with blob.open("r") as f:
@@ -126,16 +129,16 @@ class Backend:
             bio_details = f.read().split('|')
 
         profile_details = account_details + bio_details
-        
+
         return profile_details
 
     def editprofile(self, user_name, profile_details):
         bucket = client.bucket('userspasswords')
         bucket2 = client.bucket('bio_and_gamepreferences')
-        blob2 = bucket2.blob(user_name) 
-        blob = bucket.blob(user_name)     
+        blob2 = bucket2.blob(user_name)
+        blob = bucket.blob(user_name)
         edited_details = []
-        
+
         if profile_details[0]:
             with blob.open("r") as f:
                 psw = f.read().split('|')
@@ -145,21 +148,23 @@ class Backend:
         with blob2.open("r") as f:
             bio_details = f.read().split('|')
         print(bio_details)
-        for i in range(1,len(profile_details)):
-            print(profile_details[i],"hey")
+        for i in range(1, len(profile_details)):
+            print(profile_details[i], "hey")
             if profile_details[i] != '':
                 edited_details.append(profile_details[i])
-                
+
             else:
-                edited_details.append(bio_details[i-1])
+                edited_details.append(bio_details[i - 1])
 
         edited_details.append(bio_details[-1])
         with blob2.open("w") as f:
-            f.write(f'{edited_details[0]}|{edited_details[1]}|{edited_details[2]}|{edited_details[3]}|{edited_details[4]}')
+            f.write(
+                f'{edited_details[0]}|{edited_details[1]}|{edited_details[2]}|{edited_details[3]}|{edited_details[4]}'
+            )
 
-    def editprofilepic(self,user_name,avatar):
+    def editprofilepic(self, user_name, avatar):
         bucket2 = client.bucket('bio_and_gamepreferences')
-        blob2 = bucket2.blob(user_name) 
+        blob2 = bucket2.blob(user_name)
 
         with blob2.open("r") as f:
             bio_details = f.read().split('|')
@@ -167,5 +172,6 @@ class Backend:
         bio_details[-1] = avatar
 
         with blob2.open("w") as f:
-            f.write(f'{bio_details[0]}|{bio_details[1]}|{bio_details[2]}|{bio_details[3]}|{bio_details[4]}')
-
+            f.write(
+                f'{bio_details[0]}|{bio_details[1]}|{bio_details[2]}|{bio_details[3]}|{bio_details[4]}'
+            )

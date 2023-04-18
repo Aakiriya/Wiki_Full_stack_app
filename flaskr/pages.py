@@ -2,6 +2,7 @@ from flask import Flask, request, render_template, session, redirect, url_for
 from .backend import Backend
 import re
 
+
 def make_endpoints(app):
 
     # Flask uses the "app.route" decorator to call methods when users
@@ -86,7 +87,6 @@ def make_endpoints(app):
                                        games=games)
         return render_template("upload.html", games=games)
 
-
     @app.route('/login', methods=['POST', 'GET'])
     def sign_in():
         games = Backend("contentwiki").get_image("games")
@@ -114,8 +114,8 @@ def make_endpoints(app):
             username = request.form['name']
             password = request.form['psw']
             email = request.form['email_add']
-            b = Backend('userspasswords')                                              
-            
+            b = Backend('userspasswords')
+
             info = b.sign_up(
                 username, password, email
             )  #passes the unsername and password entered to the signup function in Backend class
@@ -123,7 +123,8 @@ def make_endpoints(app):
             if info == 'Username already exsists':
                 return render_template('signup.html', info=info, games=games)
             else:
-                session['username'] = username  #adds the username to the session
+                session[
+                    'username'] = username  #adds the username to the session
                 return redirect('/')
         return render_template('signup.html', games=games)
 
@@ -169,16 +170,16 @@ def make_endpoints(app):
         b2 = Backend('contentwiki')
         profile_details = b1.profile(user_name)
         profile_pic = b2.get_image(profile_details[-1])
-        return render_template('profile.html', username = user_name, 
-                                               email = profile_details[1],
-                                               bio = profile_details[2],
-                                               favorite_games = profile_details[3],
-                                               favorite_genres = profile_details[4],
-                                               favorite_developers = profile_details[-2],
-                                               profile_pic_path = profile_pic,
-                                               games = games)
+        return render_template('profile.html',
+                               username=user_name,
+                               email=profile_details[1],
+                               bio=profile_details[2],
+                               favorite_games=profile_details[3],
+                               favorite_genres=profile_details[4],
+                               favorite_developers=profile_details[-2],
+                               profile_pic_path=profile_pic,
+                               games=games)
 
-    
     @app.route('/editprofile', methods=['GET', 'POST'])
     def edit_profile():
         games = Backend("contentwiki").get_image("games")
@@ -200,8 +201,14 @@ def make_endpoints(app):
 
             b.editprofile(user_name, profile_details)
             return redirect('/profile')
-            
-        return render_template('editprofile.html', email='', bio='', favorite_games='', favorite_genres='', favorite_developers='', games=games)
+
+        return render_template('editprofile.html',
+                               email='',
+                               bio='',
+                               favorite_games='',
+                               favorite_genres='',
+                               favorite_developers='',
+                               games=games)
 
     @app.route('/editprofilepic', methods=['GET', 'POST'])
     def avatar_selection():
@@ -221,7 +228,7 @@ def make_endpoints(app):
         avatar9 = b2.get_image('avatar9')
         avatar10 = b2.get_image('avatar10')
 
-        if request.method =="POST":
+        if request.method == "POST":
             if request.form.get('avatar1', None) == 'on':
                 selected_avatar = 'avatar1'
                 b1.editprofilepic(user_name, selected_avatar)
@@ -262,16 +269,16 @@ def make_endpoints(app):
                 selected_avatar = 'avatar10'
                 b1.editprofilepic(user_name, selected_avatar)
             return redirect('/profile')
-        
+
         return render_template('editprofilepic.html',
-                                Avatar1=avatar1,
-                                Avatar2=avatar2,
-                                Avatar3=avatar3,
-                                Avatar4=avatar4,
-                                Avatar5=avatar5,
-                                Avatar6=avatar6,
-                                Avatar7=avatar7,
-                                Avatar8=avatar8,
-                                Avatar9=avatar9,
-                                Avatar10=avatar10,
-                                games=games)
+                               Avatar1=avatar1,
+                               Avatar2=avatar2,
+                               Avatar3=avatar3,
+                               Avatar4=avatar4,
+                               Avatar5=avatar5,
+                               Avatar6=avatar6,
+                               Avatar7=avatar7,
+                               Avatar8=avatar8,
+                               Avatar9=avatar9,
+                               Avatar10=avatar10,
+                               games=games)
