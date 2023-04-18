@@ -84,7 +84,9 @@ def make_endpoints(app):
                     'username'] = username  #adds the username to the session
                 return redirect('/')
         return render_template('login.html')
+
     """ Feature Code (Isaac): Test if the user entered valid psw and email """
+
     @app.route('/signup', methods=['POST', 'GET'])
     def sign_up():
         if request.method == "POST":
