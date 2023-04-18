@@ -174,7 +174,7 @@ class TestBackend(unittest.TestCase):
             blob = bucket.blob(user_name)
             blob_contents = blob.download_as_bytes().decode('utf-8')
             self.assertIsNotNone(blob_contents)  # expected_password
-    
+
     def test_profile(self):
         user_name = 'testuser'
         mock_blob1 = Mock()
@@ -195,7 +195,10 @@ class TestBackend(unittest.TestCase):
             backend = Backend(storage_client)
             profile_details = backend.profile(user_name)
 
-        expected_details = ['testuser', 'testpasswordhash', 'John Doe', '25', 'male', 'NYC', 'Strategy,Action']
+        expected_details = [
+            'testuser', 'testpasswordhash', 'John Doe', '25', 'male', 'NYC',
+            'Strategy,Action'
+        ]
         self.assertEqual(profile_details, expected_details)
 
 

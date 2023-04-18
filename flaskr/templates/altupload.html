@@ -29,7 +29,7 @@ Upload
 <script>
 window.onload = function() {
   var message = document.querySelector('#message').innerHTML;
-    if (confirm(message+", Do you want to continue the upload without genre?")) {
+    if (alert(message)) {
       document.querySelector('form').submit();
     } else {
       // disable the form if the user cancels the upload
