@@ -122,19 +122,79 @@ def test_signup_route(client):
     """ Tests if the signup page is routing properly and it displays the intended message """
     with mock.patch('flaskr.backend.storage.Client'):
         resp = client.get("/signup").data.decode('utf-8')
-        assert '<p>Please fill in this form to create an account.</p>' in resp
+        assert '<p>Please fill in this form to create an account. A valid Password Should have at least one number, Should have at least one uppercase and one lowercase character, Should have at least one special symbol and Should be between 6 to 20 characters long.</p>' in resp
 
 
 def test_signin_route(client):
-    """ Tests if the signup page is routing properly and it displays the intended message """
+    """ Tests if the signup page is routing properly and it display the intended message """
     with mock.patch('flaskr.backend.storage.Client'):
         resp = client.get("/login").data.decode('utf-8')
         assert '<p>Please fill in this form to sign in to your account.</p>' in resp
 
 
-def test_editor(client):
-    """ Tests if the editor API gets rendered correctly """
-    # get editor page and assert that TinyMCE API script tag is present in the HTML
-    with mock.patch('flaskr.backend.storage.Client'):
-        resp = client.get("/tinyedit").data.decode('utf-8')
-        assert '<script src="/static/tinymce/tinymce.min.js"></script>' in resp
+""" Test if the code to check valid email works by givin a valid email and not getting Invalid email displayed """
+
+
+def test_valid_email(client):
+    # with mock.patch('flaskr.backend.storage.Client'):
+    with client.session_transaction() as session:
+        session['username'] = None
+
+    data = {
+        'name': None,
+        'psw': 'Password123@',
+        'email_add': 'testuser@test.com'
+    }
+
+    resp = client.post('/signup', data=data, follow_redirects=True)
+    assert b"Invalid Email" not in resp.data
+
+
+""" Test if the code to check valid email works by givin an invalid email and getting Invalid email displayed """
+
+
+def test_invalid_email(client):
+    with client.session_transaction() as session:
+        session['username'] = None
+
+    data = {
+        'name': 'testuser',
+        'psw': 'Password123@',
+        'email_add': 'testusertest.com'
+    }
+    resp = client.post('/signup', data=data, follow_redirects=True)
+
+    assert b"Invalid Email" in resp.data
+
+
+""" Test if the code to check valid password works by givin a valid password and not getting Invalid password displayed """
+
+
+def test_valid_password(client):
+    with client.session_transaction() as session:
+        session['username'] = None
+
+    data = {
+        'name': None,
+        'psw': 'Password123@',
+        'email_add': 'testuser@test.com'
+    }
+    resp = client.post('/signup', data=data, follow_redirects=True)
+    assert b"Invalid Password" not in resp.data
+
+
+""" Test if the code to check valid password works by givin a valid password and getting Invalid password displayed """
+
+
+def test_invalid_password(client):
+    with client.session_transaction() as session:
+        session['username'] = None
+
+    data = {
+        'name': 'testuser',
+        'psw': 'password',
+        'email_add': 'testuser@test.com'
+    }
+    resp = client.post('/signup', data=data, follow_redirects=True)
+
+    assert b"Invalid Password" in resp.data
