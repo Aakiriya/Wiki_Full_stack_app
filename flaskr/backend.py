@@ -18,12 +18,14 @@ class Backend:
         self.bucket = self.storage_client.bucket(bucket_name)
 
     def get_wiki_page(self, name):
-        blob = self.bucket.blob(name)  #search for th page with the given name
+        blob = self.bucket.blob(name)  # search for the page with the given name
         if blob.exists():
-            return blob.download_as_string(
-            )  #if the page exists return the string
+            content = blob.download_as_string(
+            )  # if the page exists, get the content
+            mime_type = 'text/html'  # set the MIME type to 'text/html'
+            return content, mime_type
         else:
-            return None  #else, return None
+            return None  # else return None
 
     def get_all_page_names(self):
         blobs = self.storage_client.list_blobs(
@@ -42,7 +44,7 @@ class Backend:
             else:
                 f.write(page.read())
 
-    def sign_up(self, user_name, pwd):
+    def sign_up(self, user_name, pwd, email):
         # get username, password from user, salt for hashing
         name = user_name
         password = pwd
@@ -54,11 +56,35 @@ class Backend:
         hashed_password = hashlib.md5(dataBase_password.encode())
 
         bucket = client.bucket('userspasswords')
+        bucket2 = client.bucket('bio_and_gamepreferences')
+        blob2 = bucket2.blob(name)
         blob = bucket.blob(name)
 
-        #Adds the encoded passsword to the created user blob
-        with blob.open("w") as f:
-            f.write(f"{hashed_password.hexdigest()}")
+        if blob.exists():
+            return 'Username already exsists'
+
+        else:
+            #Adds the encoded passsword to the created user blob
+            with blob.open("w") as f:
+                f.write(f"{hashed_password.hexdigest()},{email}")
+            with blob2.open("w") as f:
+                f.write(
+                    f"{name} hasn't added a bio,{name} hasn't added any favorite games,{name} hasn't added any favorite genres,{name} hasn't added any favorite developers,default_pic"
+                )
+                return None
+
+        if blob.exists():
+            return 'Username already exsists'
+
+        else:
+            #Adds the encoded passsword to the created user blob
+            with blob.open("w") as f:
+                f.write(f"{hashed_password.hexdigest()},{email}")
+            with blob2.open("w") as f:
+                f.write(
+                    f"{name} hasn't added a bio,{name} hasn't added any favorite games,{name} hasn't added any favorite genres,{name} hasn't added any favorite developers,default_pic"
+                )
+                return None
 
     def sign_in(self, user_name, pwd):
         # get username, password from user, salt for hashing
@@ -68,7 +94,7 @@ class Backend:
 
         # Adding salt at the last of the password
         dataBase_password = password + salt
-        # encoding the password
+        # Encoding the password
         hashed_password = hashlib.md5(dataBase_password.encode())
 
         bucket = client.bucket('userspasswords')

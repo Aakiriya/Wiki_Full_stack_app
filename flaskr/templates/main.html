@@ -1,32 +1,39 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Cool Team</title>
-
-    {% if session.username %}
-        <a href="/">Home</a>
-        <a href="/pages">Pages</a>
-        <a href="/about">About</a>
-        <a> | {{session.username}} |</a>
-        <a href="/upload">Upload</a>
-        <a href="/logout">Logout</a>
-    {% else %}
-        <a href="/">Home</a>
-        <a href="/pages">Pages</a>
-        <a href="/about">About</a>
-        <a href="/login">Login</a>
-        <a href="/signup">Signup</a>
-    {% endif %}
-
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
-{% block content %}
 <body>
-    <div>       
-        <br>
-        Welcome to our video game wiki!
-    </div>
+    {% if session.username %}
+        <nav>
+            <a href="/">Home</a>
+            <a href="/pages">Pages</a>
+            <a href="/about">About</a>
+            <a>| {{ session.username }} |</a>
+            <a href="/upload">Upload</a>
+            <a href="/logout">Logout</a>
+            <a href="/tinyedit">Editor</a>
+        </nav>
+    {% else %}
+        <nav>
+            <a href="/">Home</a>
+            <a href="/pages">Pages</a>
+            <a href="/about">About</a>
+            <a href="/login">Login</a>
+            <a href="/signup">Signup</a>
+        </nav>
+    {% endif %}
+
+    {% block content %}
+        <div>       
+            <br>
+            <h1>Welcome to our video game wiki!</h1>
+        </div>
+    {% endblock %}
 </body>
-<hr>
-{% endblock %}
+
 </html>
+
