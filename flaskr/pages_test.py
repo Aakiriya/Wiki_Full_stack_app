@@ -133,6 +133,7 @@ def test_signin_route(client):
 
 
 def test_editor(client):
+    """ Tests if the editor API gets rendered correctly """
     # get editor page and assert that TinyMCE API script tag is present in the HTML
     with mock.patch('flaskr.backend.storage.Client'):
         resp = client.get("/tinyedit").data.decode('utf-8')

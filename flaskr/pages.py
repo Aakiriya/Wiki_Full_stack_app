@@ -25,6 +25,8 @@ def make_endpoints(app):
                                g_pic=g_pic,
                                r_pic=r_pic)
 
+    """ Added HTML format to upload """
+
     @app.route("/upload", methods=['GET', 'POST'])
     def upload_file():
         # sets allowed file types, messages to return based on situation
@@ -123,6 +125,8 @@ def make_endpoints(app):
         # when user logs out, set session username to None, then redirect to home page
         session['username'] = None
         return redirect('/')
+
+    """ Opens the renders the API html to displat the editor """
 
     @app.route("/tinyedit", methods=['POST', 'GET'])
     def editor():

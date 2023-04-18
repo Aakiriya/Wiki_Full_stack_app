@@ -11,6 +11,7 @@ logging.basicConfig(level=logging.DEBUG)
 # properties) as we set "FLASK_APP=flaskr" before running "flask".
 def create_app(test_config=None):
     # Create and configure the app.
+    """ Added the static folder address to add javascript, css and static files"""
     app = Flask(__name__,
                 instance_relative_config=True,
                 static_url_path='/static')
