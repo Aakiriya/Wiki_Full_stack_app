@@ -1,22 +1,37 @@
 {% extends 'main.html' %}
 
 {% block content %}
-    <div>
-        {% if pages %}
-            <h1>Pages Contained in this Wiki</h1>
+        <div>
+            {% if pages %}
+                <h1>Pages Contained in this Wiki</h1>
+            {% endif %}
+
+            {% if content %}
+            <h1>{{ page_title }}</h1>
+            <hr>
+            {{ content|safe }}
+            {% endif %}
+        </div>
+        
+   <div>
+        {% if genres %}
+            <form method = post>
+                <select name= genre>
+                    {% for genre in genres %}
+                        <option value= "{{genre}}">{{genre}}</option>"
+                    {% endfor %}
+                </select>
+            <input type='submit' value='Search'>
+            </form>
         {% endif %}
-        {% if content %}
-        <h1>{{ page_title }}</h1>
-        {{ content|safe }}
-        {% endif %}
-    </div>
-    <div>
+        
         {% if pages %}
-            <ul>
-                {% for page in pages %}
-                    <a href="/pages/{{ page }}">{{ page }}</a>
+            <p> {{ section }}</p>
+            <form>
+                {% for page in pages.split(',') %}
+                    <a href="/pages/{{ page }}">{{ page }}</a><br>
                 {% endfor %}
-            </ul>
+            </form>
         {% endif %}
     </div>
 {% endblock %}

@@ -5,13 +5,13 @@ import tempfile
 import hashlib
 from google.cloud import storage
 from flask import Flask
-from .backend import Backend
+from .backend import Backend, NoGenresFoundException
 
 
 class TestBackend(unittest.TestCase):
 
     def setUp(self):
-        """ Sets up necessary attributes to use for testing.
+        """ Sets up the necessary attributes to use for testing.
         Args:
             bucket_name: mock bucket
             backend: injects the mock bucket into class Backend
@@ -53,7 +53,7 @@ class TestBackend(unittest.TestCase):
             fake_file = open("fakefile")
             fake_file.content_type = '.txt'
             self.backend.upload('test-game', fake_file)
-            result, r_type = self.backend.get_wiki_page('test-game')
+            result = self.backend.get_wiki_page('test-game')
             assert result == b'test title'
         mock_file.assert_called_with("fakefile")
 
@@ -85,7 +85,7 @@ class TestBackend(unittest.TestCase):
         self.mock_blob.download_as_string.return_value = b'Test content'
         self.backend.bucket.blob = MagicMock(return_value=self.mock_blob)
 
-        result, r_type = self.backend.get_wiki_page(name)
+        result = self.backend.get_wiki_page(name)
 
         self.assertEqual(result, b'Test content')
 
@@ -203,6 +203,35 @@ class TestBackend(unittest.TestCase):
         temp_file.write(text)
         mock_bleach.return_value = text
         assert self.backend.sanitize(temp_file) == text
+    def test_get_genre_success(self):
+        """ Creates a test bucket and asserts the valid game title returns the expected genres """
+        b = Backend('test-bucket')
+        test_title = "Call of Duty: Warzone"
+        actual = ['Shooter']
+        assert b.get_genre(test_title) == actual
+
+    def test_get_genre_invalid_title(self):
+        """ Creates a test bucket and asserts that an error is thrown for invalid title """
+        b = Backend('test-bucket')
+        test_title = "not a title"
+        with self.assertRaises(NoGenresFoundException):
+            b.get_genre(test_title)
+
+    def test_get_genre_no_genres(self):
+        """ Creates a test bucket and asserts that an error is thrown for valid title with no genres in database """
+        b = Backend('test-bucket')
+        test_title = "Warzone"
+        with self.assertRaises(NoGenresFoundException):
+            b.get_genre(test_title)
+
+    def test_upload_genre(self):
+        """ Sets mock blob to return a mock game title, then asserts when the title and genre are uploaded, the game title is retrievable """
+        self.mock_blob.exists.return_value = True
+        self.mock_blob.download_as_string.return_value = b'test game'
+        self.backend.bucket.blob = MagicMock(return_value=self.mock_blob)
+
+        self.backend.upload_genre('test genre', 'test game')
+        assert self.backend.get_wiki_page('test genre') == b'test game'
 
 
 if __name__ == '__main__':

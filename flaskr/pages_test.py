@@ -41,16 +41,13 @@ def test_home_logged_in(client):
     """ Sets the user as logged in, retrieves the home page, and asserts that the user has option to logout (meaning they are currently
     logged in) within the page contents
     """
-    # set user as not logged in
     with client.session_transaction() as session:
-        session['username'] = None
+        session['username'] = 'me'
 
-    # get home page, assert it was successful and that the user has option to login within the page contents
-    resp = client.get("/")
-    assert resp.status_code == 200
-    response = resp.data.decode('utf-8')
-    login = '<a href="/login">Login</a>'
-    assert login in response
+    with mock.patch('flaskr.backend.storage.Client'):
+        resp = client.get("/").data.decode('utf-8')
+        logout = '<a href="/logout">Logout</a>'
+        assert  logout in resp
 
 
 def test_about(client):
