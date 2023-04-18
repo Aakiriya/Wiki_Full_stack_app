@@ -1,3 +1,4 @@
+// This JavaSctipt Initilized the whole Editor TinyMCE API with custom menu and features such as upload and edit
 tinymce.init({
     selector: 'textarea#default',
     width: 1000,

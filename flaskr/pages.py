@@ -3,6 +3,7 @@ from .backend import Backend
 import re
 
 
+
 def make_endpoints(app):
 
     # Flask uses the "app.route" decorator to call methods when users
@@ -25,6 +26,8 @@ def make_endpoints(app):
                                b_pic=b_pic,
                                g_pic=g_pic,
                                r_pic=r_pic)
+
+    """ Added HTML format to upload """
 
     @app.route("/upload", methods=['GET', 'POST'])
     def upload_file():
@@ -150,6 +153,8 @@ def make_endpoints(app):
         # when user logs out, set session username to None, then redirect to home page
         session['username'] = None
         return redirect('/')
+
+    """ Opens the renders the API html to displat the editor """
 
     @app.route("/tinyedit", methods=['POST', 'GET'])
     def editor():
