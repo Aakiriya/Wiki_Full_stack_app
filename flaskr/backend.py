@@ -17,12 +17,14 @@ class Backend:
         self.bucket = self.storage_client.bucket(bucket_name)
 
     def get_wiki_page(self, name):
-        blob = self.bucket.blob(name)  #search for th page with the given name
+        blob = self.bucket.blob(name)  # search for the page with the given name
         if blob.exists():
-            return blob.download_as_string(
-            )  #if the page exists return the string
+            content = blob.download_as_string(
+            )  # if the page exists, get the content
+            mime_type = 'text/html'  # set the MIME type to 'text/html'
+            return content, mime_type
         else:
-            return None  #else, return None
+            return None  # else return None
 
     def get_all_page_names(self):
         blobs = self.storage_client.list_blobs(
@@ -67,7 +69,7 @@ class Backend:
 
         # Adding salt at the last of the password
         dataBase_password = password + salt
-        # encoding the password
+        # Encoding the password
         hashed_password = hashlib.md5(dataBase_password.encode())
 
         bucket = client.bucket('userspasswords')

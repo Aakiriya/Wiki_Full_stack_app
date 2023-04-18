@@ -1,29 +1,20 @@
 {% extends "main.html" %}
-<style>
-    body{
-
-        background-image: url("{{games}}");
-        background-size: cover;
-    }
-</style>
-
-{% block page_name %}
-Upload
-{% endblock %}
 
 {% block content %}
 <div>
-<!doctype html>
-<title>Upload</title>
-<h3> Upload a doc to the wiki! </h3>
+    <title>Upload</title>
+    <h1> Upload a doc to the wiki! </h1>
 </div>
-<hr>
+
 <div>
-<form method=post enctype=multipart/form-data>
-    <input type='text' name='filename' placeholder="wikiname" required>
-    <input type='file' name='file'> 
-    <input type='submit' value='Upload'>
+    <form method=post enctype=multipart/form-data>
+        <div>
+        <input type='text' name='filename' placeholder="Wiki Title" required>
+        <input type='file' name='file'> 
+        <input type='submit' value='Upload'>
+    </div>
 </form>
 <p id=message>{{message}}</p>
 </div>
+
 {% endblock %}

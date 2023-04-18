@@ -1,0 +1,96 @@
+/* set default font family and size */
+body {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 16px;
+    margin: 15px;
+    padding: 0;
+  }
+  
+  /* use a cover background image and add a shadow box */
+  body:before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url("/static/games.png");
+    background-size: cover;
+    z-index: -1;
+    box-shadow: inset 0 0 0 1000px rgba(255, 255, 255, 0.528);
+  }
+  
+  /* set padding for the nav and add a border-bottom */
+  nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 10px;
+    background-color: rgba(0, 0, 0, 0.8);
+    border-bottom: 1px solid rgb(0, 60, 95);
+    z-index: 1;
+  }
+  
+  /* center nav links and add margin between them */
+  nav a {
+    display: inline-block;
+    text-align: center;
+    margin: 0 10px;
+  }
+  
+  /* change link color and add hover effect */
+  nav a {
+    color: #fff;
+    transition: color .5s ease-in-out;
+  }
+  
+  nav a:hover {
+    color: rgb(142, 221, 229);
+  }
+  
+  /* style the main content area */
+  main {
+    max-width: 800px;
+    margin: 80px auto 50px auto; /* updates margin values autmatically */
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 5px 5px 10px rgba(10, 30, 43, 0.1);
+  }
+  
+  /* style the heading */
+  h1 {
+    font-size: 36px;
+    margin-top: 80px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  /* center the content */
+  div {
+    margin-top: 10px;
+    text-align: center;
+    margin: auto;
+  }
+  
+  /* center the form and button */
+  form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  form div {
+    margin-top: 10px;
+  }
+  
+  /* center the button */
+  form input[type="submit"] {
+    display: block;
+    margin: 0 auto;
+  }
+  
+  a {
+    display: block;
+    margin-top: 10px;
+  }

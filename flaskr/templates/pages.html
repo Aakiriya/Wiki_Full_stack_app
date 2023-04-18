@@ -1,26 +1,19 @@
 {% extends 'main.html' %}
-<style>
-    body{
-
-        background-image: url("{{games}}");
-        background-size: cover;
-    }
-</style>
 
 {% block content %}
     <div>
         {% if pages %}
-        <h3>Pages Contained in this Wiki</h3>
+            <h1>Pages Contained in this Wiki</h1>
         {% endif %}
-        <h4>{{ page_title }}</h4>
+        {% if content %}
+        {{ content|safe }}
+        {% endif %}
     </div>
-    <hr>
-   <div>
-    <p>{{ page_content }}</p>
+    <div>
         {% if pages %}
             <ul>
                 {% for page in pages %}
-                    <a href="/pages/{{ page }}">{{ page }}</a><br>
+                    <a href="/pages/{{ page }}">{{ page }}</a>
                 {% endfor %}
             </ul>
         {% endif %}
