@@ -203,7 +203,7 @@ class Backend:
             return 'Invalid User'
         else:
             with blob.open("r") as f:
-                psw = f.read()
+                psw = f.read().split(',')[0]
             if hashed_password.hexdigest() != psw:
                 return 'Invalid Password'
             else:
@@ -259,3 +259,5 @@ class Backend:
         if not type(sanitized) is bytes:
             return sanitized.encode('utf-8')
         return sanitized
+
+Backend('contentwiki').upload('Minecraft', b'In Minecraft, players explore a blocky, procedurally generated, three-dimensional world with virtually infinite terrain and may discover and extract raw materials, craft tools and items, and build structures, earthworks, and machines.')
