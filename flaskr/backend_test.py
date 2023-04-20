@@ -175,31 +175,82 @@ class TestBackend(unittest.TestCase):
             blob_contents = blob.download_as_bytes().decode('utf-8')
             self.assertIsNotNone(blob_contents)  # expected_password
 
-    def test_profile(self):
+    @patch('flaskr.backend.client')
+    def test_profile_details(self, mock_client):
         user_name = 'testuser'
         mock_blob1 = Mock()
         mock_blob1.exists.return_value = True
         mock_blob1.download_as_bytes.return_value = b'testpasswordhash'
+        mock_bucket1 = Mock()
+        mock_bucket1.blob.return_value = mock_blob1
+
         mock_blob2 = Mock()
         mock_blob2.exists.return_value = True
-        mock_blob2.download_as_bytes.return_value = b'John Doe|25|male|NYC|Strategy,Action'
+        mock_blob2.download_as_bytes.return_value = b'Bio|Fav Games|Fav Genres|Fav Developers|Profile pic'
+        mock_bucket2 = Mock()
+        mock_bucket2.blob.return_value = mock_blob2
 
-        with patch('google.cloud.storage.Client'):
-            storage_client = Mock()
-            bucket1 = Mock()
-            bucket1.blob.return_value = mock_blob1
-            bucket2 = Mock()
-            bucket2.blob.return_value = mock_blob2
-            storage_client.bucket.side_effect = [bucket1, bucket2]
+        mock_client.bucket.side_effect = [mock_bucket1, mock_bucket2]
 
-            backend = Backend(storage_client)
-            profile_details = backend.profile(user_name)
+        # create a new Mock object for bio_and_game_prefs
+        mock_bio_and_game_prefs = Mock()
+        mock_bio_and_game_prefs.split.return_value = ['Bio', 'Fav Games', 'Fav Genres', 'Fav Developers', 'Profile pic']
 
-        expected_details = [
-            'testuser', 'testpasswordhash', 'John Doe', '25', 'male', 'NYC',
-            'Strategy,Action'
-        ]
-        self.assertEqual(profile_details, expected_details)
+        # set the expected return value
+        expected_return_value = ['testpasswordhash', mock_bio_and_game_prefs]
+
+        with patch.object(storage, 'Client'):
+            # call the function and check the return value
+            assert self.backend.profile(user_name) == expected_return_value
+
+
+    @patch('flaskr.backend.client')
+    def test_edit_profile(self, mock_client):
+        user_name = 'testuser'
+        profile_details = ['new_password', 'new_bio', '', '', '', '']
+        mock_blob1 = Mock()
+        mock_blob1.exists.return_value = True
+        mock_blob1.download_as_bytes.return_value = b'old_password_hash'
+        mock_bucket1 = Mock()
+        mock_bucket1.blob.return_value = mock_blob1
+    
+        mock_blob2 = Mock()
+        mock_blob2.exists.return_value = True
+        mock_blob2.download_as_bytes.return_value = b'old_bio|old_fav_games|old_fav_genres|old_fav_devs|old_profile_pic'
+        mock_bucket2 = Mock()
+        mock_bucket2.blob.return_value = mock_blob2
+    
+        mock_client.bucket.side_effect = [mock_bucket1, mock_bucket2]
+    
+        expected_edited_details = ['new_bio', 'old_fav_games', 'old_fav_genres', 'old_fav_devs', 'old_profile_pic']
+    
+        edited_details = self.backend.editprofile(user_name, profile_details)
+        
+        self.assertEqual(expected_edited_details, edited_details[:-1])
+
+    @patch('flaskr.backend.client')
+    def test_editprofilepic(self, mock_client):
+        # Set up the mock bucket and blob objects
+        mock_blob = MagicMock()
+        mock_blob.exists.return_value = True
+        mock_blob.read.return_value = "Bio|Fav Games|Fav Genres|Fav Developers|old_pic"
+        mock_bucket = MagicMock()
+        mock_bucket.blob.return_value = mock_blob
+        mock_client.bucket.return_value = mock_bucket
+       
+        # Call the editprofilepic method
+        user_name = 'testuser'
+        avatar = 'new_pic'
+        self.backend.editprofilepic(user_name, avatar)
+
+        # Check that the blob was opened twice and written to once
+        assert mock_blob.open.call_count == 2
+        assert mock_blob.open.return_value.__enter__.return_value.write.call_count == 1
+
+        # Check that the correct data was written to the blob
+        expected_data = "Bio|Fav Games|Fav Genres|Fav Developers|new_pic"
+        mock_blob.open.return_value.__enter__.return_value.write.assert_called_with(expected_data)
+
 
 
 if __name__ == '__main__':

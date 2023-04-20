@@ -77,9 +77,7 @@ def make_endpoints(app):
                     for genre in genres:
                         g.upload_genre(genre, game_title)
                 else:
-                    g.upload_genre("*All*", game_title)
-                    b.upload(game_title, file)
-                    return render_template("upload.html",
+                    return render_template("altupload.html",
                                            message=message[4],
                                            games=games)
 
@@ -132,7 +130,7 @@ def make_endpoints(app):
                 else:
                     g.upload_genre("*All*", game_title)
                     b.upload(game_title, file)
-                    return render_template("altupload.html",
+                    return render_template("upload.html",
                                            message=message[3],
                                            games=games)
 

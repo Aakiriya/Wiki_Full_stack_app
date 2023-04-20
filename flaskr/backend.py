@@ -185,15 +185,10 @@ class Backend:
         blob2 = bucket2.blob(user_name)
         blob = bucket.blob(user_name)
 
-        with blob.open("r") as f:
-            account_details = f.read().split('|')
+        password_hash = blob.download_as_string().decode('utf-8').strip().split('|')
+        bio_and_game_prefs = blob2.download_as_string().decode('utf-8').strip().split('|')
 
-        with blob2.open("r") as f:
-            bio_details = f.read().split('|')
-
-        profile_details = account_details + bio_details
-
-        return profile_details
+        return password_hash + bio_and_game_prefs
 
     def editprofile(self, user_name, profile_details):
         bucket = client.bucket('userspasswords')
@@ -210,12 +205,10 @@ class Backend:
 
         with blob2.open("r") as f:
             bio_details = f.read().split('|')
-        print(bio_details)
+        
         for i in range(1, len(profile_details)):
-            print(profile_details[i], "hey")
             if profile_details[i] != '':
                 edited_details.append(profile_details[i])
-
             else:
                 edited_details.append(bio_details[i - 1])
 
@@ -238,3 +231,6 @@ class Backend:
             f.write(
                 f'{bio_details[0]}|{bio_details[1]}|{bio_details[2]}|{bio_details[3]}|{bio_details[4]}'
             )
+
+b = Backend('userpasswords')
+print(b.profile('Zoro'))
